@@ -19,6 +19,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/hello', function () {
+    return 'hello world';
+});
+
 Route::get('/test', function () {
     // project to user
     // $project = Project::find(4);
