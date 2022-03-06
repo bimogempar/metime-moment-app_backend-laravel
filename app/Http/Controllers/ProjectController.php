@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use App\Models\User;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 
 class ProjectController extends Controller
@@ -37,7 +39,21 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+            $attr = $request->validate([
+                'client' => 'required',
+            ]);
+            $newproject = Project::create($attr);
+            $newproject->users()->attach($request->assignment_user);
+            return response()->json([
+                'message' => 'successfully',
+                'project' => $newproject->with('users')->find($newproject->id),
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     /**
@@ -46,9 +62,19 @@ class ProjectController extends Controller
      * @param  \App\Models\Project  $project
      * @return \Illuminate\Http\Response
      */
-    public function show(Project $project)
+    public function show($slug)
     {
-        //
+        try {
+            $project = Project::with('users')->where('slug', $slug)->first();
+            return response()->json([
+                'message' => 'successfully',
+                'project' => $project,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     /**
@@ -71,7 +97,20 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
-        //
+        try {
+            $project->update([
+                'client' => $request->client,
+            ]);
+            $project->users()->sync($request->assignment_user);
+            return response()->json([
+                'message' => 'successfully',
+                'project' => $project->with('users')->find($project->id),
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     /**
@@ -85,20 +124,59 @@ class ProjectController extends Controller
         //
     }
 
-    public function querySearch(Request $request)
+    public function getProjectsWithSearchKeyword(Request $request)
     {
-        $projects = Project::latest();
+        // $projects = Project::with('users')->latest();
+        $projects = Project::with('users')->latest();
+
+        // search keyword
         if ($s = $request->input('s')) {
             $projects
                 ->where('client', 'like', '%' . $s . '%')
-                ->orWhere('date', 'like', '%' . $s . '%');
+                ->orWhere('date', 'like', '%' . $s . '%')
+                ->orWhere('status', 'like', '%' . $s . '%')
+                ->orWhere('phone_number', 'like', '%' . $s . '%')
+                ->orWhere('location', 'like', '%' . $s . '%')
+                ->orWhere(function ($query) use ($s) {
+                    $query->whereHas('users', function ($q) use ($s) {
+                        $q->where('name', 'like', '%' . $s . '%');
+                    });
+                });
         }
 
-        if ($start = $request->input('start') and $end = $request->input('end')) {
+        if ($category = $request->input('category')) {
             $projects
-                ->whereBetween('date', [$start, $end]);
+                ->where('status', 'like', '%' . $category . '%');
         }
 
-        return $projects->get();
+        // sort by date
+        if ($sort = $request->input('sort')) {
+            $projects->orderBy('date', $sort);
+        }
+
+        // date range
+        if ($start = $request->input('start') and $end = $request->input('end')) {
+            $projects->whereBetween('date', [$start, $end])->get();
+        }
+
+        // paginate
+        $perpage = 3;
+        $page = $request->input('page', 1);
+        $total = $projects->count();
+        // $result = $projects->offset(($page - 1) * $perpage)->limit($perpage)->get();
+        $result = $projects->get();
+
+        // dd($projects->whereBetween('date', [$start, $end])->get());
+
+        // return $projects->get();
+
+        // return response()->json($show);
+
+        return [
+            'total' => $total,
+            'page' => $page,
+            'last_page' => ceil($total / $perpage),
+            'data' => $result,
+        ];
     }
 }

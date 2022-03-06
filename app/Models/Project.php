@@ -10,6 +10,11 @@ class Project extends Model
     use HasFactory;
     protected $guarded = [];
 
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+
     public function users()
     {
         return $this->belongsToMany(User::class);

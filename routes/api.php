@@ -18,36 +18,46 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
-Route::get('/hello', function () {
-    return 'hello world';
+//
+Route::get('/test', function () {
+    return 'It works!';
 });
 
-Route::get('/test', function () {
+// test many to many relationship
+Route::get('/test/many-to-many', function () {
     // project to user
-    // $project = Project::find(4);
+    foreach (Project::all() as $project) {
+        $project->users()->sync([rand(1, 3), rand(1, 3), rand(1, 3)]);
+    }
+    $show = $project->with('users')->get();
+
     // $users = User::all();
 
     // attach user to project
-    // $project->users()->sync([2, 3, 4, 5, 6, 8]);
+    // $project->users()->sync(rand(1, 10));
+    // $show = $project->with('users')->get();
 
     // $eachproject = Project::where('id', 1);
     // $show = $eachproject->with('users')->first();
 
     // attach project to user
-    $user = User::find(2);
-    $user->projects()->sync([1, 2, 3, 4, 5]);
+    // $user = User::find(2);
+    // $user->projects()->sync([1, 2, 3, 4, 5]);
 
     // user to project
     // $project = Project::find(1);
     // $show = $project->users()->with('projects')->get();
 
     // show project from user
-    $show = $user->projects()->get();
+    // $user = User::find(3);
+    // $show = $user->with('projects')->find(3);
+
 
     return response()->json($show);
     // return response()->json(['msg' => 'work']);
 });
+
+Route::get('testing/projects', [ProjectController::class, 'getProjectsWithSearchKeyword']);
 
 // login page
 Route::post('login', [AuthController::class, 'loginAuth']);
@@ -59,5 +69,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('user', [AuthController::class, 'getUser']);
 
     // query search and filter
-    Route::get('projects', [ProjectController::class, 'querySearch']);
+    Route::get('projects', [ProjectController::class, 'getProjectsWithSearchKeyword']);
+
+    Route::post('projects/store', [ProjectController::class, 'store']);
+    Route::get('projects/{slug}', [ProjectController::class, 'show']);
+    Route::patch('projects/update/{project}', [ProjectController::class, 'update']);
 });

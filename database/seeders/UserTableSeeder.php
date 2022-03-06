@@ -17,12 +17,13 @@ class UserTableSeeder extends Seeder
      */
     public function run()
     {
+        User::factory()->count(10)->create();
+
         User::create([
             'name' => 'admin',
             'username' => 'admin',
             'email' => 'admin@example.com',
             'no_hp' => '12345678910',
-            'img' => 'https://i.pravatar.cc/',
             'role' => 2,
             'password' => Hash::make('password'),
         ]);
@@ -30,12 +31,9 @@ class UserTableSeeder extends Seeder
         User::create([
             'name' => 'bimo',
             'username' => 'bimo',
-            'img' => 'https://i.pravatar.cc/',
             'email' => 'bimo@example.com',
             'no_hp' => '1234567891011',
             'password' => Hash::make('password'),
         ]);
-
-        User::factory()->count(10)->create();
     }
 }

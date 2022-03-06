@@ -19,6 +19,10 @@ class CreateProjectsTable extends Migration
             $table->string('slug');
             $table->date('date');
             $table->time('time');
+            $table->string('location');
+            $table->integer('status');
+            $table->string('phone_number');
+            $table->string('img');
             $table->timestamps();
         });
     }
