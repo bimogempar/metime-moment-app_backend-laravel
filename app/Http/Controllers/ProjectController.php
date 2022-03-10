@@ -160,17 +160,10 @@ class ProjectController extends Controller
         }
 
         // paginate
-        $perpage = 3;
+        $perpage = 12;
         $page = $request->input('page', 1);
         $total = $projects->count();
-        // $result = $projects->offset(($page - 1) * $perpage)->limit($perpage)->get();
-        $result = $projects->get();
-
-        // dd($projects->whereBetween('date', [$start, $end])->get());
-
-        // return $projects->get();
-
-        // return response()->json($show);
+        $result = $projects->offset(($page - 1) * $perpage)->limit($perpage)->get();
 
         return [
             'total' => $total,
