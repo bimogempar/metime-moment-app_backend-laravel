@@ -160,7 +160,7 @@ class ProjectController extends Controller
         }
 
         // paginate
-        $perpage = 12;
+        $perpage = 9;
         $page = $request->input('page', 1);
         $total = $projects->count();
         $result = $projects->offset(($page - 1) * $perpage)->limit($perpage)->get();

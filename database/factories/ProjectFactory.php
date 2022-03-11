@@ -25,7 +25,7 @@ class ProjectFactory extends Factory
             'location' => $this->faker->streetName(),
             'status' => $this->faker->numberBetween(1, 3),
             'phone_number' => $this->faker->phoneNumber(),
-            'img' => $this->faker->imageUrl(640, 480, 'animals', true, 'cats'),
+            'img' => "https://source.unsplash.com/random/1280x720/?wedding",
             'slug' => $slug,
         ];
     }
