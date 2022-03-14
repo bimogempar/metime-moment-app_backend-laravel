@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Mail\TestingMail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -20,6 +22,8 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'username',
+        'no_hp',
         'password',
         'role',
     ];
@@ -46,5 +50,19 @@ class User extends Authenticatable
     public function projects()
     {
         return $this->belongsToMany(Project::class);
+    }
+
+    public function sendEmailRegister($user, $tokeninitialpassword)
+    {
+        Mail::send('emails.welcome', ['user' => $user, 'token_initial_password' => $tokeninitialpassword], function ($m) use ($user) {
+            $m->from('admin@metimemoment.com', 'Metime Moment');
+
+            $m->to($user->email, $user->name)->subject('Welcome to Metime Moment');
+        });
+    }
+
+    public function TokenInitialPassword()
+    {
+        return $this->hasOne(TokenInitialPassword::class);
     }
 }

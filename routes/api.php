@@ -57,10 +57,12 @@ Route::get('/test/many-to-many', function () {
     // return response()->json(['msg' => 'work']);
 });
 
-Route::get('testing/projects', [ProjectController::class, 'getProjectsWithSearchKeyword']);
-
 // login page
 Route::post('login', [AuthController::class, 'loginAuth']);
+
+// set pass after registration
+Route::get('/set-pass/{token_initial_password}', [AuthController::class, 'formSetPass']);
+Route::post('/set-pass', [AuthController::class, 'setPass']);
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     // auth
