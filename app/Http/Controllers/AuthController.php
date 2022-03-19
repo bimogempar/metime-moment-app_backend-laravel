@@ -113,7 +113,7 @@ class AuthController extends Controller
 
             if (!$user || !Hash::check($request->password, $user->password)) {
                 throw ValidationException::withMessages([
-                    'email' => 'The provided credentials are incorrect.',
+                    'error' => 'The provided credentials are incorrect.',
                 ]);
             }
 
@@ -121,7 +121,7 @@ class AuthController extends Controller
 
             if ($user->TokenInitialPassword->status === 0) {
                 return response()->json([
-                    'message' => 'Please check your email to set your password',
+                    'error' => 'Please check your email to set your password',
                 ]);
             }
 
@@ -132,7 +132,7 @@ class AuthController extends Controller
             ], 200);
         } catch (Exception $e) {
             return response()->json([
-                'error' => "The provided credentials are incorrect."
+                'error' => 'The provided credentials are incorrect.',
             ]);
         }
     }
