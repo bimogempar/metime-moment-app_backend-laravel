@@ -61,13 +61,15 @@ class AuthController extends Controller
             $tokeninitialpassword = TokenInitialPassword::where('token_initial_password', $token_initial_password)->firstOrFail();
             if ($tokeninitialpassword) {
                 if ($user = User::where('id', $tokeninitialpassword->user_id)->first()) {
-                    return $user;
+                    return response()->json([
+                        'user' => $user,
+                    ], 200);
                 }
             }
         } catch (Exception $e) {
             return response()->json([
-                'error' => $e->getMessage()
-            ]);
+                'error' => "Token set init password not found"
+            ], 404);
         }
     }
 
