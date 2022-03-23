@@ -58,7 +58,7 @@ Route::get('/test/many-to-many', function () {
 });
 
 // login page
-Route::post('login', [AuthController::class, 'loginAuth']);
+Route::post('/login', [AuthController::class, 'loginAuth']);
 
 // set pass after registration
 Route::get('/set-pass/{token_initial_password}', [AuthController::class, 'formSetPass']);

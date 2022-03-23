@@ -58,11 +58,14 @@ class AuthController extends Controller
     public function formSetPass($token_initial_password)
     {
         try {
+            // $tokeninitialpassword.status = 0 => user not yet set password
+            // $tokeninitialpassword.status = 1 => user already set password
             $tokeninitialpassword = TokenInitialPassword::where('token_initial_password', $token_initial_password)->firstOrFail();
             if ($tokeninitialpassword) {
                 if ($user = User::where('id', $tokeninitialpassword->user_id)->first()) {
                     return response()->json([
                         'user' => $user,
+                        'token' => $tokeninitialpassword,
                     ], 200);
                 }
             }
