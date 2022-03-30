@@ -159,4 +159,18 @@ class AuthController extends Controller
     {
         return $request->user();
     }
+
+    public function getUserByUsername($username)
+    {
+        try {
+            $user = User::where('username', $username)->firstOrFail()->load('projects');
+            return response()->json([
+                'user' => $user,
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 404);
+        }
+    }
 }

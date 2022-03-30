@@ -69,6 +69,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('register', [AuthController::class, 'registerAuth']);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('user', [AuthController::class, 'getUser']);
+    Route::get('user/{username}', [AuthController::class, 'getUserByUsername']);
 
     // query search and filter
     Route::get('projects', [ProjectController::class, 'getProjectsWithSearchKeyword']);
