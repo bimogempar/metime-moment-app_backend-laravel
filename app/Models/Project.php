@@ -10,6 +10,7 @@ class Project extends Model
     use HasFactory;
     protected $guarded = [];
 
+    // project->status (1,3) 1 = on scedule, 2 = on progress, 3 = done
     public function getRouteKeyName()
     {
         return 'slug';

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\TestingMail;
+use App\Models\Project;
 use App\Models\TokenInitialPassword;
 use App\Models\User;
 use Exception;
@@ -163,9 +164,13 @@ class AuthController extends Controller
     public function getUserByUsername($username)
     {
         try {
-            $user = User::where('username', $username)->firstOrFail()->load('projects');
+            $user = User::where('username', $username)->firstOrFail();
+            $projectUser = Project::with('users')->whereHas('users', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })->get();
             return response()->json([
                 'user' => $user,
+                'projects' => $projectUser,
             ], 200);
         } catch (Exception $e) {
             return response()->json([

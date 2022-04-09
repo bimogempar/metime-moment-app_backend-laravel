@@ -20,7 +20,6 @@ class UserFactory extends Factory
             'username' => $this->faker->userName(),
             'email' => $this->faker->safeEmail(),
             'no_hp' => $this->faker->phoneNumber(),
-            // 'img' => "https://static01.nyt.com/images/2021/09/14/science/07CAT-STRIPES/07CAT-STRIPES-mediumSquareAt3X-v2.jpg",
             // 'email_verified_at' => now(),
             'password' => Hash::make('password'),
             // 'remember_token' => Str::random(10),

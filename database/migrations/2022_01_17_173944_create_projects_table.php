@@ -22,7 +22,7 @@ class CreateProjectsTable extends Migration
             $table->string('location');
             $table->integer('status');
             $table->string('phone_number');
-            $table->string('img');
+            $table->string('img')->nullable();
             $table->timestamps();
         });
     }

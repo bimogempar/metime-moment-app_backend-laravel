@@ -33,7 +33,7 @@ class UserTableSeeder extends Seeder
 
         $tokeninitialpassword = Str::random(30);
         User::create([
-            'name' => 'admin',
+            'name' => 'Admin',
             'username' => 'admin',
             'email' => 'admin@example.com',
             'no_hp' => '12345678910',
@@ -42,19 +42,22 @@ class UserTableSeeder extends Seeder
         ])->TokenInitialPassword()->save(
             new TokenInitialPassword([
                 'token_initial_password' => $tokeninitialpassword,
-                'status' => 0,
+                'status' => 1,
             ])
         );
         // )->sendemailregister('admin@example.com', $tokeninitialpassword);
 
         User::create([
-            'name' => 'bimo',
-            'username' => 'bimo',
+            'name' => 'Bimo Gempar Buono',
+            'username' => 'bimogempar',
             'email' => 'bimo@example.com',
             'no_hp' => '1234567891011',
             'password' => Hash::make('password'),
         ])->TokenInitialPassword()->save(
-            TokenInitialPassword::factory()->make()
+            new TokenInitialPassword([
+                'token_initial_password' => $tokeninitialpassword,
+                'status' => 1,
+            ])
         );
         // )->sendemailregister('bimo@example.com', $tokeninitialpassword);
     }
