@@ -79,6 +79,7 @@ class AuthController extends Controller
 
     public function setPass(Request $request)
     {
+        // return $request->all();
         try {
             $attr = $request->validate([
                 'token_initial_password' => 'required',
@@ -101,7 +102,7 @@ class AuthController extends Controller
             }
         } catch (Exception $e) {
             return response()->json([
-                'error' => $e->getMessage()
+                'message' => $e->getMessage()
             ]);
         }
     }
