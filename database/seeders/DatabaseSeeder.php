@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Features;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -18,12 +19,16 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(UserTableSeeder::class);
         $this->call(ProjectTableSeeder::class);
+        $this->call(FeaturesSeeder::class);
 
         // Seed many to many relationship
         $user = User::all();
         Project::all()->each(function ($project) use ($user) {
             $project->users()->attach(
-                $user->random(rand(1, 3))->pluck('id')->toArray()
+                $user->except(6)->random(rand(1, 3))->pluck('id')->toArray()
+            );
+            $project->features()->saveMany(
+                Features::factory(rand(0, 5))->make()
             );
         });
     }

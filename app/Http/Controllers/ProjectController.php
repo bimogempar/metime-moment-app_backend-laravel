@@ -43,6 +43,7 @@ class ProjectController extends Controller
             $attr = $request->validate([
                 'client' => 'required',
             ]);
+            $attr['slug'] = str_slug($request->client);
             $newproject = Project::create($attr);
             $newproject->users()->attach($request->assignment_user);
             return response()->json([
@@ -65,7 +66,7 @@ class ProjectController extends Controller
     public function show($slug)
     {
         try {
-            $project = Project::with('users')->where('slug', $slug)->first();
+            $project = Project::with('users', 'features')->where('slug', $slug)->first();
             return response()->json([
                 'message' => 'successfully',
                 'project' => $project,
@@ -104,7 +105,7 @@ class ProjectController extends Controller
             $project->users()->sync($request->assignment_user);
             return response()->json([
                 'message' => 'successfully',
-                'project' => $project->with('users')->find($project->id),
+                'project' => $project->with('users', 'features')->find($project->id),
             ], 200);
         } catch (Exception $e) {
             return response()->json([

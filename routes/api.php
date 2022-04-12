@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FeaturesController;
 use App\Http\Controllers\ProjectController;
 use App\Models\Project;
 use App\Models\User;
@@ -77,4 +78,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('projects/store', [ProjectController::class, 'store']);
     Route::get('projects/{slug}', [ProjectController::class, 'show']);
     Route::patch('projects/update/{project}', [ProjectController::class, 'update']);
+
+    // update features
+    Route::post('features/{id}', [FeaturesController::class, 'updateFeatures']);
+    Route::post('projects/{projectid}/features/store', [FeaturesController::class, 'storeFeatures']);
 });
