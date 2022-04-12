@@ -80,6 +80,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::patch('projects/update/{project}', [ProjectController::class, 'update']);
 
     // update features
-    Route::post('features/{id}', [FeaturesController::class, 'updateFeatures']);
-    Route::post('projects/{projectid}/features/store', [FeaturesController::class, 'storeFeatures']);
+    Route::post('features/{id}', [FeaturesController::class, 'updateFeature']);
+    Route::post('projects/{projectid}/features/store', [FeaturesController::class, 'storeFeature']);
+    Route::delete('features/{id}/delete', [FeaturesController::class, 'deleteFeature']);
 });
