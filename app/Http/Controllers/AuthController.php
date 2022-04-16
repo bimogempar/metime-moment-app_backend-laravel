@@ -110,6 +110,7 @@ class AuthController extends Controller
 
     public function forgotPass(Request $request)
     {
+        // return $request->all();
         try {
             $attr = $request->validate([
                 'email' => 'required|email',
@@ -127,7 +128,7 @@ class AuthController extends Controller
             ], 200);
         } catch (Exception $e) {
             return response()->json([
-                'message' => $e->getMessage()
+                'error' => 'Email not found'
             ]);
         }
     }
