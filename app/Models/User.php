@@ -52,11 +52,10 @@ class User extends Authenticatable
         return $this->belongsToMany(Project::class);
     }
 
-    public function sendEmailRegister($user, $tokeninitialpassword)
+    public function sendEmailRegister($type_set_password, $user, $tokeninitialpassword)
     {
-        Mail::send('emails.welcome', ['user' => $user, 'token_initial_password' => $tokeninitialpassword], function ($m) use ($user) {
+        Mail::send('emails.welcome', ['type_set_password' => $type_set_password, 'user' => $user, 'token_initial_password' => $tokeninitialpassword], function ($m) use ($user) {
             $m->from('admin@metimemoment.com', 'Metime Moment');
-
             $m->to($user->email, $user->name)->subject('Welcome to Metime Moment');
         });
     }

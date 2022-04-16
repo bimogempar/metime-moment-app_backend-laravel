@@ -41,7 +41,8 @@ class AuthController extends Controller
                     ])
                 );
 
-                $user->sendEmailRegister($user, $tokeninitialpassword);
+                $type_set_password = "set init password";
+                $user->sendEmailRegister($type_set_password, $user, $tokeninitialpassword);
 
                 return response()->json([
                     'token_initial_password' => $tokeninitialpassword,
@@ -56,7 +57,7 @@ class AuthController extends Controller
         return response()->json(['message' => 'Not for this role']);
     }
 
-    public function formSetPass($token_initial_password)
+    public function getSetPass($token_initial_password)
     {
         try {
             // $tokeninitialpassword.status = 0 => user not yet set password
@@ -77,7 +78,7 @@ class AuthController extends Controller
         }
     }
 
-    public function setPass(Request $request)
+    public function setInitPass(Request $request)
     {
         // return $request->all();
         try {
@@ -107,6 +108,30 @@ class AuthController extends Controller
         }
     }
 
+    public function forgotPass(Request $request)
+    {
+        try {
+            $attr = $request->validate([
+                'email' => 'required|email',
+            ]);
+
+            $type_set_password = "forgot password";
+            $user = User::where('email', $attr['email'])->firstOrFail();
+            $token = $user->TokenInitialPassword()->firstOrFail();
+            $token->status = 0;
+            $user->sendEmailRegister($type_set_password, $user, $token->token_initial_password);
+            $token->save();
+
+            return response()->json([
+                'message' => 'Successfully reset password and please check your email!',
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
     public function loginAuth(Request $request)
     {
         try {
@@ -116,7 +141,7 @@ class AuthController extends Controller
                 'password' => 'required',
             ]);
 
-            $user = User::where('username', $request->username)->orWhere('email', $request->email)->first();
+            $user = User::where('username', $request->username)->orWhere('email', $request->username)->first();
 
             if (!$user || !Hash::check($request->password, $user->password)) {
                 throw ValidationException::withMessages([
@@ -172,6 +197,45 @@ class AuthController extends Controller
             return response()->json([
                 'user' => $user,
                 'projects' => $projectUser,
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 404);
+        }
+    }
+
+    public function getUserSetting($username)
+    {
+        try {
+            $user = User::where('username', $username)->firstOrFail();
+            return response()->json([
+                'user' => $user,
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 404);
+        }
+    }
+
+    public function updateUserSetting(Request $request, $username)
+    {
+        try {
+            $user = User::where('username', $username)->firstOrFail();
+            $old_password = $user->password;
+            if ($request->has('new_password')) {
+                if (Hash::check($request->old_password, $old_password)) {
+                    $user->password = Hash::make($request->new_password);
+                } else {
+                    return response()->json([
+                        'error' => 'Old password is wrong',
+                    ], 404);
+                }
+            }
+            $user->update($request->all());
+            return response()->json([
+                'user' => $user,
             ], 200);
         } catch (Exception $e) {
             return response()->json([

@@ -120,9 +120,21 @@ class ProjectController extends Controller
      * @param  \App\Models\Project  $project
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Project $project)
+    public function destroy($id)
     {
-        //
+        try {
+            $project = Project::findOrFail($id);
+            $project->features()->delete();
+            $project->users()->detach();
+            $project->delete();
+            return response()->json([
+                'message' => 'successfully',
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     public function getProjectsWithSearchKeyword(Request $request)

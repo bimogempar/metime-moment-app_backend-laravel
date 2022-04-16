@@ -62,8 +62,9 @@ Route::get('/test/many-to-many', function () {
 Route::post('/login', [AuthController::class, 'loginAuth']);
 
 // set pass after registration
-Route::get('/set-pass/{token_initial_password}', [AuthController::class, 'formSetPass']);
-Route::post('/set-pass', [AuthController::class, 'setPass']);
+Route::get('/set-pass/{token_initial_password}', [AuthController::class, 'getSetPass']);
+Route::post('/set-pass', [AuthController::class, 'setInitPass']);
+Route::post('/forgot-pass', [AuthController::class, 'forgotPass']);
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     // auth
@@ -71,16 +72,18 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('user', [AuthController::class, 'getUser']);
     Route::get('user/{username}', [AuthController::class, 'getUserByUsername']);
+    Route::get('user/{username}/settings', [AuthController::class, 'getUserSettings']);
+    Route::patch('user/{username}/updateprofile', [AuthController::class, 'updateUserSetting']);
 
     // query search and filter
     Route::get('projects', [ProjectController::class, 'getProjectsWithSearchKeyword']);
-
     Route::post('projects/store', [ProjectController::class, 'store']);
     Route::get('projects/{slug}', [ProjectController::class, 'show']);
     Route::patch('projects/update/{project}', [ProjectController::class, 'update']);
+    Route::delete('projects/{id}/delete', [ProjectController::class, 'destroy']);
 
     // update features
-    Route::post('features/{id}', [FeaturesController::class, 'updateFeature']);
+    Route::patch('features/{id}', [FeaturesController::class, 'updateFeature']);
     Route::post('projects/{projectid}/features/store', [FeaturesController::class, 'storeFeature']);
     Route::delete('features/{id}/delete', [FeaturesController::class, 'deleteFeature']);
 });

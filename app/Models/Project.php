@@ -21,7 +21,7 @@ class Project extends Model
         return $this->belongsToMany(User::class);
     }
 
-    public function Features()
+    public function features()
     {
         return $this->hasMany(Features::class);
     }
