@@ -37,7 +37,7 @@ class UserTableSeeder extends Seeder
             'username' => 'admin',
             'email' => 'admin@example.com',
             'no_hp' => '12345678910',
-            'role' => 2,
+            'role' => 3,
             'password' => Hash::make('password'),
         ])->TokenInitialPassword()->save(
             new TokenInitialPassword([
@@ -53,6 +53,7 @@ class UserTableSeeder extends Seeder
             'username' => 'bimogempar',
             'email' => 'bimo@example.com',
             'no_hp' => '1234567891011',
+            'role' => 2,
             'password' => Hash::make('password'),
         ])->TokenInitialPassword()->save(
             new TokenInitialPassword([
