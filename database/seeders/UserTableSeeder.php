@@ -20,7 +20,7 @@ class UserTableSeeder extends Seeder
     public function run()
     {
 
-        User::factory()->count(5)->create()->each(function ($user) {
+        User::factory()->count(13)->create()->each(function ($user) {
             $tokeninitialpassword = Str::random(30);
             $user->TokenInitialPassword()->save(
                 new TokenInitialPassword([

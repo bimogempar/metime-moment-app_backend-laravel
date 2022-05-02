@@ -26,17 +26,18 @@ class FeaturesController extends Controller
     public function storeFeature($projectid, Request $request)
     {
         try {
-            $feature = new Features();
-            $feature->feature = $request->feature;
-            $feature->status = 0;
-            $feature->project_id = $projectid;
-            $feature->save();
-            return response()->json(
-                ['message' => 'successfully created'],
-            );
+            $feature = Features::create([
+                'feature' => $request->feature,
+                'status' => 0,
+                'project_id' => $projectid,
+            ]);
+            return response()->json([
+                'message' => 'successfully created',
+                'feature' => $feature
+            ]);
         } catch (Exception $e) {
             return response()->json([
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
         }
     }
@@ -44,8 +45,8 @@ class FeaturesController extends Controller
     public function deleteFeature($id)
     {
         try {
-            $features = Features::findOrFail($id);
-            $features->delete();
+            $feature = Features::findOrFail($id);
+            $feature->delete();
             return response()->json(
                 ['message' => 'successfully deleted'],
             );

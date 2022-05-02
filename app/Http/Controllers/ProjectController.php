@@ -101,8 +101,12 @@ class ProjectController extends Controller
         try {
             $project->update([
                 'client' => $request->client,
+                'status' => $request->status,
+                'date' => Carbon::parse($request->date),
+                'location' => $request->location,
+                'phone_number' => $request->phone_number,
             ]);
-            $project->users()->sync($request->assignment_user);
+            // $project->users()->sync($request->assignment_user);
             return response()->json([
                 'message' => 'successfully',
                 'project' => $project->with('users', 'features')->find($project->id),

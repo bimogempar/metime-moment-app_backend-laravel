@@ -22,10 +22,9 @@ class ProjectFactory extends Factory
             'date' => $this->faker->dateTimeThisMonth(),
             'time' => $this->faker->time(),
             'location' => $this->faker->streetName(),
-            'location' => $this->faker->streetName(),
             'status' => $this->faker->numberBetween(1, 3),
             'phone_number' => $this->faker->phoneNumber(),
-            'slug' => $slug,
+            'slug' => Str::random(10),
         ];
     }
 }
