@@ -106,7 +106,7 @@ class ProjectController extends Controller
                 'location' => $request->location,
                 'phone_number' => $request->phone_number,
             ]);
-            // $project->users()->sync($request->assignment_user);
+            $project->users()->sync($request->assignment_user);
             return response()->json([
                 'message' => 'successfully',
                 'project' => $project->with('users', 'features')->find($project->id),
@@ -188,5 +188,55 @@ class ProjectController extends Controller
             'last_page' => ceil($total / $perpage),
             'data' => $result,
         ];
+    }
+
+    // delete project_user
+    public function deleteProjectUser($project, $user)
+    {
+        try {
+            $project = Project::findOrFail($project);
+            return $project->users()->detach($user);
+            $project->users()->detach($user);
+            return response()->json([
+                'message' => 'successfully',
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    // add project_user
+    public function addProjectUser($project, $user)
+    {
+        try {
+            $project = Project::findOrFail($project);
+            return $project->users()->attach($user);
+            $project->users()->attach($user);
+            return response()->json([
+                'message' => 'successfully',
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    // get all users
+    public function getAllUsers()
+    {
+        try {
+            $users = User::all();
+            return response()->json([
+                'message' => 'successfully',
+                'users' => $users,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 }

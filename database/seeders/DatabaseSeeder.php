@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
         $user = User::all();
         Project::all()->each(function ($project) use ($user) {
             $project->users()->attach(
-                $user->except(6)->random(rand(1, 3))->pluck('id')->toArray()
+                $user->except(5)->random(rand(1, 3))->pluck('id')->toArray()
             );
             $project->features()->saveMany(
                 Features::factory(rand(0, 5))->make()

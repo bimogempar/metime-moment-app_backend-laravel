@@ -82,6 +82,13 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::patch('projects/update/{project}', [ProjectController::class, 'update']);
     Route::delete('projects/{id}/delete', [ProjectController::class, 'destroy']);
 
+    // attach detach user to project
+    Route::post('projects/{project}/add-user', [ProjectController::class, 'addProjectUser']);
+    Route::delete('projects/{project}/user/{user}', [ProjectController::class, 'deleteProjectUser']);
+
+    // fetch all users
+    Route::get('users', [ProjectController::class, 'getAllUsers']);
+
     // update features
     Route::patch('features/{id}', [FeaturesController::class, 'updateFeature']);
     Route::post('projects/{projectid}/features/store', [FeaturesController::class, 'storeFeature']);
