@@ -15,8 +15,8 @@ class CreateProgressTable extends Migration
     {
         Schema::create('progress', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('project_id');
-            $table->unsignedBigInteger('user_id');
+            $table->foreignId('project_id');
+            $table->foreignId('user_id');
             $table->string('description');
             $table->string('img_url');
             $table->timestamps();

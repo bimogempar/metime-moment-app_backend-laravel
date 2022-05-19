@@ -24,6 +24,11 @@ Route::get('/test', function () {
     return response()->json(['message' => 'It Works!']);
 });
 
+Route::get('/test2', function () {
+    $data = Project::with('users', 'progress')->get();
+    return response()->json($data);
+});
+
 // test many to many relationship
 Route::get('/test/many-to-many', function () {
     // project to user

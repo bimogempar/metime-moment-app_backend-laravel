@@ -21,16 +21,5 @@ class DatabaseSeeder extends Seeder
         $this->call(UserTableSeeder::class);
         $this->call(ProjectTableSeeder::class);
         $this->call(ProgressTableSeeder::class);
-
-        // Seed many to many relationship
-        $user = User::all();
-        Project::all()->each(function ($project) use ($user) {
-            $project->users()->attach(
-                $user->except(5)->random(rand(1, 3))->pluck('id')->toArray()
-            );
-            $project->features()->saveMany(
-                Features::factory(rand(0, 5))->make()
-            );
-        });
     }
 }
