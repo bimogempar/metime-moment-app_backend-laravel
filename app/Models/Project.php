@@ -25,4 +25,9 @@ class Project extends Model
     {
         return $this->hasMany(Features::class);
     }
+
+    public function progress()
+    {
+        return $this->hasMany(Progress::class);
+    }
 }

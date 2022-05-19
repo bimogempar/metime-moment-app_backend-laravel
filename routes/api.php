@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Route;
 */
 //
 Route::get('/test', function () {
-    return 'It works!';
+    return response()->json(['message' => 'It Works!']);
 });
 
 // test many to many relationship

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Features;
+use App\Models\Progress;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -19,7 +20,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(UserTableSeeder::class);
         $this->call(ProjectTableSeeder::class);
-        $this->call(FeaturesSeeder::class);
+        $this->call(ProgressTableSeeder::class);
 
         // Seed many to many relationship
         $user = User::all();

@@ -66,7 +66,7 @@ class ProjectController extends Controller
     public function show($slug)
     {
         try {
-            $project = Project::with('users', 'features')->where('slug', $slug)->first();
+            $project = Project::with('users', 'features', 'progress')->where('slug', $slug)->first();
             return response()->json([
                 'message' => 'successfully',
                 'project' => $project,
@@ -144,7 +144,7 @@ class ProjectController extends Controller
     public function getProjectsWithSearchKeyword(Request $request)
     {
         // $projects = Project::with('users')->latest();
-        $projects = Project::with('users')->latest();
+        $projects = Project::with('users', 'progress')->latest();
 
         // search keyword
         if ($s = $request->input('s')) {
