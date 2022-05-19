@@ -18,7 +18,7 @@ class CreateProgressTable extends Migration
             $table->foreignId('project_id');
             $table->foreignId('user_id');
             $table->string('description');
-            $table->string('img_url');
+            $table->string('img_url')->nullable();
             $table->timestamps();
         });
     }

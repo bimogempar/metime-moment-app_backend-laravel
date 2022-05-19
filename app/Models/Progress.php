@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Progress extends Model
 {
     use HasFactory;
+    protected $guarded = [];
 
     public function project()
     {

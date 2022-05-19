@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FeaturesController;
+use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\ProjectController;
 use App\Models\Project;
 use App\Models\User;
@@ -22,11 +23,6 @@ use Illuminate\Support\Facades\Route;
 //
 Route::get('/test', function () {
     return response()->json(['message' => 'It Works!']);
-});
-
-Route::get('/test2', function () {
-    $data = Project::with('users', 'progress')->get();
-    return response()->json($data);
 });
 
 // test many to many relationship
@@ -80,7 +76,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('user/{username}/settings', [AuthController::class, 'getUserSettings']);
     Route::patch('user/{username}/updateprofile', [AuthController::class, 'updateUserSetting']);
 
-    // query search and filter
+    // project
     Route::get('projects', [ProjectController::class, 'getProjectsWithSearchKeyword']);
     Route::post('projects/store', [ProjectController::class, 'store']);
     Route::get('projects/{slug}', [ProjectController::class, 'show']);
@@ -94,8 +90,12 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     // fetch all users
     Route::get('users', [ProjectController::class, 'getAllUsers']);
 
-    // update features
+    // features
     Route::patch('features/{id}', [FeaturesController::class, 'updateFeature']);
     Route::post('projects/{projectid}/features/store', [FeaturesController::class, 'storeFeature']);
     Route::delete('features/{id}/delete', [FeaturesController::class, 'deleteFeature']);
+
+    // progress
+    Route::post('projects/{project_id}/progress/store', [ProgressController::class, 'storeProgress']);
+    Route::delete('projects/{project_id}/progress/{progress_id}', [ProgressController::class, 'destroyProgress']);
 });
