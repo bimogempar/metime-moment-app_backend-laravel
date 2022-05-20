@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Progress;
 use App\Models\Project;
 use App\Models\User;
 use Carbon\Carbon;
@@ -67,6 +68,9 @@ class ProjectController extends Controller
     {
         try {
             $project = Project::with('users', 'features', 'progress')->where('slug', $slug)->first();
+            $project->progress = $project->progress->map(function ($item) {
+                $item->name = $item->user->name;
+            });
             return response()->json([
                 'message' => 'successfully',
                 'project' => $project,
@@ -128,6 +132,7 @@ class ProjectController extends Controller
     {
         try {
             $project = Project::findOrFail($id);
+            $project->progress()->delete();
             $project->features()->delete();
             $project->users()->detach();
             $project->delete();

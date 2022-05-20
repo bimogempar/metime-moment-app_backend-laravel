@@ -18,8 +18,10 @@ class ProgressController extends Controller
             $progress->project_id = $project_id;
             $progress->save();
 
-            $project = Project::with('progress')->find($project_id);
-
+            $project = Project::with('progress', 'users')->find($project_id);
+            $project->progress = $project->progress->map(function ($item) {
+                $item->name = $item->user->name;
+            });
             return response()->json([
                 'message' => 'Successfully create new progress',
                 'project' => $project,
