@@ -14,7 +14,10 @@ class FeaturesController extends Controller
             $features = Features::findOrFail($id);
             $features->update($request->all());
             return response()->json(
-                ['message' => 'successfully updated'],
+                [
+                    'message' => 'successfully updated',
+                    'features' => $features,
+                ],
             );
         } catch (Exception $e) {
             return response()->json([
