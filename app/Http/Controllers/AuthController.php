@@ -8,7 +8,9 @@ use App\Models\TokenInitialPassword;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -224,6 +226,29 @@ class AuthController extends Controller
     {
         try {
             $user = User::where('username', $username)->firstOrFail();
+
+            // update profile
+            $request->validate([
+                'name' => 'required',
+                'email' => 'required|email|unique:users,email,' . $user->id,
+                'username' => 'required',
+            ]);
+
+            // update img profile
+            if ($request->hasFile('img')) {
+                Storage::disk('public')->delete('img_user/' . $user->img);
+                $request->validate([
+                    'img' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                ]);
+                $img = $request->file('img');
+                $img_name = $user->username . '.' . $img->getClientOriginalExtension();
+                $img->storeAs('public/img_user', $img_name);
+                $user->img = $img_name;
+            } else {
+                $user->img = $user->img;
+            }
+
+            // change password
             $old_password = $user->password;
             if ($request->has('new_password')) {
                 if (Hash::check($request->old_password, $old_password)) {
@@ -234,8 +259,10 @@ class AuthController extends Controller
                     ], 404);
                 }
             }
+
             $user->update($request->all());
             return response()->json([
+                'message' => 'Updated successfully',
                 'user' => $user,
             ], 200);
         } catch (Exception $e) {
