@@ -60,7 +60,7 @@ Route::post('/post-file-to-gdrive', function (Request $request) {
     }
 
     Storage::disk('google')->put($dir['path'] . '/' . $img->getClientOriginalName(), file_get_contents($img));
-    return $dir;;
+    return $dir;
 });
 
 Route::get('/get-from-gdrive', function () {

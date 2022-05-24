@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Str;
 
 class ProjectController extends Controller
 {
@@ -44,13 +45,39 @@ class ProjectController extends Controller
         try {
             $attr = $request->validate([
                 'client' => 'required',
+                'date' => 'required',
+                'time' => 'required',
+                'location' => 'required',
+                'status' => 'required',
+                'phone_number' => 'required',
             ]);
             $attr['slug'] = Str::random(10);
             $newproject = Project::create($attr);
             $newproject->users()->attach($request->assignment_user);
+
+            // GDRIVE API
+            // create dir
+            Storage::disk('google')->makeDirectory($request->client);
+
+            // upload into sub folder
+            $dir = '/';
+            $recursive = false; // Get subdirectories also?
+            $files = Storage::disk('google')->files($dir);
+            $contents = collect(Storage::disk('google')->listContents($dir, $recursive));
+
+            $dir = $contents->where('type', '=', 'dir')
+                ->where('filename', '=', $request->client)
+                ->first(); // There could be duplicate directory names!
+
+            if (!$dir) {
+                return 'Directory does not exist!';
+            }
+
+            Storage::disk('google')->put($dir['path'] . '/' . $request->file('img')->getClientOriginalName(), file_get_contents($request->file('img')));
             return response()->json([
                 'message' => 'successfully',
                 'project' => $newproject->with('users')->find($newproject->id),
+                'gdrive_path' => $dir,
             ], 200);
         } catch (Exception $e) {
             return response()->json([
@@ -89,7 +116,7 @@ class ProjectController extends Controller
             }
 
             // Get the files inside the folder...
-            $files = collect(Storage::disk('google')->listContents($dir['path'], false))
+            $files = collect(Storage::disk('google')->list($dir['path'], false))
                 ->where('type', '=', 'file');
 
             return response()->json([
