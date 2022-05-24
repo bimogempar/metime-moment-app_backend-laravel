@@ -98,17 +98,8 @@ Route::get('/get-from-gdrive', function () {
         // Use the path to download each file via a generated link..
         // Storage::disk('google')->get($file['path']);
         return [$filename => Storage::disk('google')->url($path)];
+        // return [$filename => $path];
     });
-
-    // old
-    $google = Storage::disk('google');
-    $linkimg = $google->url('118j1FRoXuUyRDI5iu6Z_aKo1_xL1Nm4e');
-    $img = '<img src="' . $linkimg . '" alt="">';
-    $arrayImg = [];
-    // foreach ($directories as $directory) {
-    //     $arrayImg[] = $google->url($directory);
-    // }
-    // return view('test/test', compact('arrayImg'));
 });
 
 // test many to many relationship

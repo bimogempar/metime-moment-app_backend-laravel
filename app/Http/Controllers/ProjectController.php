@@ -51,6 +51,7 @@ class ProjectController extends Controller
                 'status' => 'required',
                 'phone_number' => 'required',
             ]);
+            $attr['folder_gdrive'] = $request->client;
             $attr['slug'] = Str::random(10);
             $newproject = Project::create($attr);
             $newproject->users()->attach($request->assignment_user);
@@ -116,8 +117,13 @@ class ProjectController extends Controller
             }
 
             // Get the files inside the folder...
-            $files = collect(Storage::disk('google')->list($dir['path'], false))
+            $files = collect(Storage::disk('google')->listContents($dir['path'], false))
                 ->where('type', '=', 'file');
+
+            $files = $files->map(function ($item) {
+                $item['path'] = Storage::disk('google')->url($item['path']);
+                return $item;
+            });
 
             return response()->json([
                 'message' => 'successfully',
