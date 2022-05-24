@@ -25,32 +25,90 @@ Route::post('/test', function (Request $request) {
     return response()->json(['message' => 'It Works!']);
 });
 
-// Testing goodle drive filesystem
+// Testing google drive filesystem
 Route::post('/post-file-to-gdrive', function (Request $request) {
     // request
     $client = $request->client;
     $img = $request->file('img');
 
-    // upload
+    Project::create([
+        'client' => $client,
+        'slug' => str_random(10),
+        'date' => '2020-01-17',
+        'time' => '17:39:44',
+        'location' => 'Lorem, ipsum dolor.',
+        'status' => 0,
+        'phone_number' => '+2348090872323',
+        'folder_gdrive' => $client,
+    ]);
 
-    Storage::disk('google')->put($img->getClientOriginalName(), file_get_contents($img));
-    $details = Storage::disk('google')->getmetaData(Storage::disk('google')->makeDirectory('/test'));
-    return $details;
+    // create dir
+    Storage::disk('google')->makeDirectory($client);
+
+    // upload into sub folder
+    $dir = '/';
+    $recursive = false; // Get subdirectories also?
+    $files = Storage::disk('google')->files($dir);
+    $contents = collect(Storage::disk('google')->listContents($dir, $recursive));
+
+    $dir = $contents->where('type', '=', 'dir')
+        ->where('filename', '=', $client)
+        ->first(); // There could be duplicate directory names!
+
+    if (!$dir) {
+        return 'Directory does not exist!';
+    }
+
+    Storage::disk('google')->put($dir['path'] . '/' . $img->getClientOriginalName(), file_get_contents($img));
+    return $dir;;
 });
 
-// get list directories from storage::disk
 Route::get('/get-from-gdrive', function () {
-    $directories = Storage::disk('google')->allDirectories();
-    $metadata = Storage::disk('google')->getAdapter()->getMetaData('1vc1kw2bzQVNNUR8FGuk4EndTJ162ztYi');
-    return $metadata['name'];
+    // The human readable folder name to get the contents of...
+    // For simplicity, this folder is assumed to exist in the root directory.
+    $folder = 'testing client';
+
+    // Get root directory contents...
+    $contents = collect(Storage::disk('google')->listContents('/', false));
+
+    // Find the folder you are looking for...
+    $dir = $contents->where('type', '=', 'dir')
+        ->where('filename', '=', $folder)
+        ->first(); // There could be duplicate directory names!
+
+    if (!$dir) {
+        return 'No such folder!';
+    }
+
+    // Get the files inside the folder...
+    $files = collect(Storage::disk('google')->listContents($dir['path'], false))
+        ->where('type', '=', 'file');
+
+    // return $files;
+    return $files->mapWithKeys(function ($file) {
+        $filename = $file['filename'] . '.' . $file['extension'];
+
+        // without slicing path
+        $path = $file['path'];
+
+        // slicing path
+        // $path = explode('/', $file['path']);
+        // $path = $path[0];
+
+        // Use the path to download each file via a generated link..
+        // Storage::disk('google')->get($file['path']);
+        return [$filename => Storage::disk('google')->url($path)];
+    });
+
+    // old
     $google = Storage::disk('google');
     $linkimg = $google->url('118j1FRoXuUyRDI5iu6Z_aKo1_xL1Nm4e');
     $img = '<img src="' . $linkimg . '" alt="">';
     $arrayImg = [];
-    foreach ($directories as $directory) {
-        $arrayImg[] = $google->url($directory);
-    }
-    return view('test/test', compact('arrayImg'));
+    // foreach ($directories as $directory) {
+    //     $arrayImg[] = $google->url($directory);
+    // }
+    // return view('test/test', compact('arrayImg'));
 });
 
 // test many to many relationship

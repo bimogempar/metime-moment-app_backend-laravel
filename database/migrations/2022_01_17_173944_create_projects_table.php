@@ -23,6 +23,7 @@ class CreateProjectsTable extends Migration
             $table->integer('status');
             $table->string('phone_number');
             $table->string('img')->nullable();
+            $table->string('folder_gdrive')->nullable();
             $table->timestamps();
         });
     }

@@ -8,6 +8,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProjectController extends Controller
 {
@@ -71,9 +72,30 @@ class ProjectController extends Controller
             $project->progress = $project->progress->map(function ($item) {
                 $item->name = $item->user->name;
             });
+
+            // show list files in folder gdrive
+            $folder = $project->folder_gdrive;
+
+            // Get root directory contents...
+            $contents = collect(Storage::disk('google')->listContents('/', false));
+
+            // Find the folder you are looking for...
+            $dir = $contents->where('type', '=', 'dir')
+                ->where('filename', '=', $folder)
+                ->first(); // There could be duplicate directory names!
+
+            if (!$dir) {
+                return 'No such folder!';
+            }
+
+            // Get the files inside the folder...
+            $files = collect(Storage::disk('google')->listContents($dir['path'], false))
+                ->where('type', '=', 'file');
+
             return response()->json([
                 'message' => 'successfully',
                 'project' => $project,
+                'files_gdrive' => $files,
             ]);
         } catch (Exception $e) {
             return response()->json([
