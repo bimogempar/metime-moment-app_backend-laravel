@@ -21,8 +21,36 @@ use Illuminate\Support\Facades\Route;
 |
 */
 //
-Route::get('/test', function () {
+Route::post('/test', function (Request $request) {
     return response()->json(['message' => 'It Works!']);
+});
+
+// Testing goodle drive filesystem
+Route::post('/post-file-to-gdrive', function (Request $request) {
+    // request
+    $client = $request->client;
+    $img = $request->file('img');
+
+    // upload
+
+    Storage::disk('google')->put($img->getClientOriginalName(), file_get_contents($img));
+    $details = Storage::disk('google')->getmetaData(Storage::disk('google')->makeDirectory('/test'));
+    return $details;
+});
+
+// get list directories from storage::disk
+Route::get('/get-from-gdrive', function () {
+    $directories = Storage::disk('google')->allDirectories();
+    $metadata = Storage::disk('google')->getAdapter()->getMetaData('1vc1kw2bzQVNNUR8FGuk4EndTJ162ztYi');
+    return $metadata['name'];
+    $google = Storage::disk('google');
+    $linkimg = $google->url('118j1FRoXuUyRDI5iu6Z_aKo1_xL1Nm4e');
+    $img = '<img src="' . $linkimg . '" alt="">';
+    $arrayImg = [];
+    foreach ($directories as $directory) {
+        $arrayImg[] = $google->url($directory);
+    }
+    return view('test/test', compact('arrayImg'));
 });
 
 // test many to many relationship

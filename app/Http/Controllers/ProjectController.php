@@ -44,7 +44,7 @@ class ProjectController extends Controller
             $attr = $request->validate([
                 'client' => 'required',
             ]);
-            $attr['slug'] = str_slug($request->client);
+            $attr['slug'] = Str::random(10);
             $newproject = Project::create($attr);
             $newproject->users()->attach($request->assignment_user);
             return response()->json([
