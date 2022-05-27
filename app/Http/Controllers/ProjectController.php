@@ -113,17 +113,17 @@ class ProjectController extends Controller
                 ->first(); // There could be duplicate directory names!
 
             if (!$dir) {
-                return 'No such folder!';
+                $files = "No such folder";
+            } else {
+                // Get the files inside the folder...
+                $files = collect(Storage::disk('google')->listContents($dir['path'], false))
+                    ->where('type', '=', 'file');
+
+                $files = $files->map(function ($item) {
+                    $item['path'] = Storage::disk('google')->url($item['path']);
+                    return $item;
+                });
             }
-
-            // Get the files inside the folder...
-            $files = collect(Storage::disk('google')->listContents($dir['path'], false))
-                ->where('type', '=', 'file');
-
-            $files = $files->map(function ($item) {
-                $item['path'] = Storage::disk('google')->url($item['path']);
-                return $item;
-            });
 
             return response()->json([
                 'message' => 'successfully',
