@@ -28,6 +28,6 @@ class Project extends Model
 
     public function progress()
     {
-        return $this->hasMany(Progress::class);
+        return $this->hasMany(Progress::class)->orderBy('created_at', 'desc');
     }
 }
