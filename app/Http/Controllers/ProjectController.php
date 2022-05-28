@@ -209,21 +209,21 @@ class ProjectController extends Controller
         // search keyword
         if ($s = $request->input('s')) {
             $projects
-                ->where('client', 'like', '%' . $s . '%')
-                ->orWhere('date', 'like', '%' . $s . '%')
-                ->orWhere('status', 'like', '%' . $s . '%')
-                ->orWhere('phone_number', 'like', '%' . $s . '%')
-                ->orWhere('location', 'like', '%' . $s . '%')
+                ->where('client', 'ilike', '%' . $s . '%')
+                ->orWhere('date', 'ilike', '%' . $s . '%')
+                ->orWhere('status', 'ilike', '%' . $s . '%')
+                ->orWhere('phone_number', 'ilike', '%' . $s . '%')
+                ->orWhere('location', 'ilike', '%' . $s . '%')
                 ->orWhere(function ($query) use ($s) {
                     $query->whereHas('users', function ($q) use ($s) {
-                        $q->where('name', 'like', '%' . $s . '%');
+                        $q->where('name', 'ilike', '%' . $s . '%');
                     });
                 });
         }
 
         if ($category = $request->input('category')) {
             $projects
-                ->where('status', 'like', '%' . $category . '%');
+                ->where('status', 'ilike', '%' . $category . '%');
         }
 
         // sort by date
