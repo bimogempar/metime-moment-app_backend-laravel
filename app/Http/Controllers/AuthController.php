@@ -6,6 +6,7 @@ use App\Mail\TestingMail;
 use App\Models\Project;
 use App\Models\TokenInitialPassword;
 use App\Models\User;
+use Auth;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -197,9 +198,11 @@ class AuthController extends Controller
             $projectUser = Project::with('users')->whereHas('users', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             })->get();
+            $authUser = Auth::user();
             return response()->json([
                 'user' => $user,
                 'projects' => $projectUser,
+                'authUser' => $authUser,
             ], 200);
         } catch (Exception $e) {
             return response()->json([
@@ -250,13 +253,13 @@ class AuthController extends Controller
 
             // change password
             $old_password = $user->password;
-            if ($request->has('new_password')) {
+            if ($request->new_password !== null) {
                 if (Hash::check($request->old_password, $old_password)) {
                     $user->password = Hash::make($request->new_password);
                 } else {
                     return response()->json([
                         'error' => 'Old password is wrong',
-                    ], 404);
+                    ]);
                 }
             }
 
