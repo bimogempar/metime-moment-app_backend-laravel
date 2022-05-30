@@ -157,7 +157,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('user', [AuthController::class, 'getUser']);
     Route::get('user/{username}', [AuthController::class, 'getUserByUsername']);
     Route::get('user/{username}/settings', [AuthController::class, 'getUserSettings']);
-    Route::patch('user/{username}/updateprofile', [AuthController::class, 'updateUserSetting']);
+    Route::post('user/{username}/updateprofile', [AuthController::class, 'updateUserSetting']);
 
     // project
     Route::get('projects', [ProjectController::class, 'getProjectsWithSearchKeyword']);
