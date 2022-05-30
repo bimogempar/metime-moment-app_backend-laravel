@@ -25,6 +25,12 @@ Route::post('/test', function (Request $request) {
     return response()->json(['message' => 'It Works!']);
 });
 
+// Testing upload file
+Route::post('/upload-file', function (Request $request) {
+    $img = $request->file('img');
+    return $img->storeAs('/test', 'test.png');
+});
+
 // Testing google drive filesystem
 Route::post('/post-file-to-gdrive', function (Request $request) {
     // request
