@@ -171,7 +171,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::delete('projects/{project}/user/{user}', [ProjectController::class, 'deleteProjectUser']);
 
     // fetch all users
-    Route::get('users', [ProjectController::class, 'getAllUsers']);
+    Route::get('users', [AuthController::class, 'getAllUsers']);
 
     // features
     Route::patch('features/{id}', [FeaturesController::class, 'updateFeature']);

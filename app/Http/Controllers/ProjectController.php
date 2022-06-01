@@ -283,20 +283,4 @@ class ProjectController extends Controller
             ]);
         }
     }
-
-    // get all users
-    public function getAllUsers()
-    {
-        try {
-            $users = User::all();
-            return response()->json([
-                'message' => 'successfully',
-                'users' => $users,
-            ]);
-        } catch (Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage()
-            ]);
-        }
-    }
 }

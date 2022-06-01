@@ -274,4 +274,27 @@ class AuthController extends Controller
             ], 404);
         }
     }
+
+    // get all users
+    public function getAllUsers(Request $request)
+    {
+        try {
+            $users = User::all();
+
+            if ($search = $request->input('s')) {
+                $users = User::where('name', 'ilike', '%' . $search . '%')
+                    ->orWhere('username', 'ilike', '%' . $search . '%')
+                    ->orWhere('email', 'ilike', '%' . $search . '%')->get();
+            }
+
+            return response()->json([
+                'message' => 'successfully',
+                'users' => $users,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
 }
