@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Features;
+use App\Models\Package;
 use App\Models\Progress;
 use App\Models\Project;
 use App\Models\User;

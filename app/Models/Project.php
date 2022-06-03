@@ -30,4 +30,9 @@ class Project extends Model
     {
         return $this->hasMany(Progress::class)->orderBy('created_at', 'desc');
     }
+
+    public function package()
+    {
+        return $this->belongsTo(Package::class, 'package_id');
+    }
 }

@@ -25,6 +25,7 @@ class ProjectFactory extends Factory
             'status' => $this->faker->numberBetween(1, 3),
             'phone_number' => $this->faker->phoneNumber(),
             'slug' => Str::random(10),
+            'package_id' => $this->faker->numberBetween(1, 2),
         ];
     }
 }
