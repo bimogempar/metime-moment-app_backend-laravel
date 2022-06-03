@@ -13,4 +13,9 @@ class Package extends Model
     {
         return $this->hasMany(Project::class);
     }
+
+    public function package_list()
+    {
+        return $this->hasMany(PackageList::class);
+    }
 }

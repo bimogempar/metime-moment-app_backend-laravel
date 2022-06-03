@@ -17,7 +17,7 @@ class CreateFeaturesTable extends Migration
             $table->id();
             $table->string('feature');
             $table->integer('status');
-            $table->foreignId('project_id');
+            $table->foreignId('project_id')->constrained();
             $table->timestamps();
         });
     }

@@ -16,9 +16,11 @@ class PackageSeeder extends Seeder
     {
         Package::create([
             'name' => 'Simple Weeding Package',
+            'price' => 4150
         ]);
         Package::create([
             'name' => 'Premium Wedding Package',
+            'price' => 5499
         ]);
     }
 }
