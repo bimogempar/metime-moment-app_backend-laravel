@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Features;
+use App\Models\Package;
 use App\Models\Progress;
 use App\Models\Project;
 use App\Models\User;
@@ -50,34 +52,64 @@ class ProjectController extends Controller
                 'location' => 'required',
                 'status' => 'required',
                 'phone_number' => 'required',
+                'package_id' => 'required',
             ]);
+
             $attr['folder_gdrive'] = $request->client;
             $attr['slug'] = Str::random(10);
+
+            if ($request->hasFile('thumbnail_img')) {
+                $request->validate([
+                    'img' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                ]);
+                $img = $request->file('thumbnail_img');
+                $img_name = $attr['slug'] . '.' . $img->getClientOriginalExtension();
+                $img->storeAs('public/thumbnail_img', $img_name);
+                $attr['thumbnail_img'] = $img_name;
+            }
+
             $newproject = Project::create($attr);
             $newproject->users()->attach($request->assignment_user);
 
             // GDRIVE API
             // create dir
             Storage::disk('google')->makeDirectory($request->client);
+            $dir = "No files found";
 
             // upload into sub folder
-            $dir = '/';
-            $recursive = false; // Get subdirectories also?
-            $files = Storage::disk('google')->files($dir);
-            $contents = collect(Storage::disk('google')->listContents($dir, $recursive));
+            if ($request->hasFile('img')) {
+                $dir = '/';
+                $recursive = false; // Get subdirectories also?
+                $files = Storage::disk('google')->files($dir);
+                $contents = collect(Storage::disk('google')->listContents($dir, $recursive));
+                $dir = $contents->where('type', '=', 'dir')
+                    ->where('filename', '=', $request->client)
+                    ->first(); // There could be duplicate directory names!
 
-            $dir = $contents->where('type', '=', 'dir')
-                ->where('filename', '=', $request->client)
-                ->first(); // There could be duplicate directory names!
-
-            if (!$dir) {
-                return 'Directory does not exist!';
+                // if (!$dir) {
+                //     return 'Directory does not exist!';
+                // }
+                Storage::disk('google')->put($dir['path'] . '/' . $request->file('img')->getClientOriginalName(), file_get_contents($request->file('img')));
             }
 
-            Storage::disk('google')->put($dir['path'] . '/' . $request->file('img')->getClientOriginalName(), file_get_contents($request->file('img')));
+            // chooee package
+            $package = Package::find($request->package_id)->with('package_list')->first();
+            $packageList = $package->package_list;
+            foreach ($packageList as $value) {
+                $arr[] = $value->name;
+            }
+            // insert into features
+            foreach ($arr as $value) {
+                $features = Features::create([
+                    'project_id' => $newproject->id,
+                    'feature' => $value,
+                    'status' => 0,
+                ]);
+            }
+
             return response()->json([
                 'message' => 'successfully',
-                'project' => $newproject->with('users')->find($newproject->id),
+                'project' => $newproject->with('users', 'features', 'progress', 'package.package_list')->find($newproject->id),
                 'gdrive_path' => $dir,
             ], 200);
         } catch (Exception $e) {
@@ -96,7 +128,7 @@ class ProjectController extends Controller
     public function show($slug)
     {
         try {
-            $project = Project::with('users', 'features', 'progress')->where('slug', $slug)->first();
+            $project = Project::with('users', 'features', 'progress', 'package.package_list')->where('slug', $slug)->first();
             $project->progress = $project->progress->map(function ($item) {
                 $item->name = $item->user->name;
             });
@@ -190,9 +222,25 @@ class ProjectController extends Controller
             $project->progress()->delete();
             $project->features()->delete();
             $project->users()->detach();
+            if ($project->thumbnail_img) {
+                Storage::disk('public')->delete('thumbnail_img/' . $project->thumbnail_img);
+            }
             $project->delete();
+
+            // Now find that directory and use its ID (path) to delete it
+            $dir = '/';
+            $recursive = true; // Get subdirectories also?
+            $contents = collect(Storage::disk('google')->listContents($dir, $recursive));
+
+            $directory = $contents
+                ->where('type', '=', 'dir')
+                ->where('filename', '=', $project->folder_gdrive)
+                ->first(); // there can be duplicate file names!
+
+            Storage::disk('google')->deleteDirectory($directory['path']);
+
             return response()->json([
-                'message' => 'successfully',
+                'message' => 'Deleted Successfully',
             ]);
         } catch (Exception $e) {
             return response()->json([
