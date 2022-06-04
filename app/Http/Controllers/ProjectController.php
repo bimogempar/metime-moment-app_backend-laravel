@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Mail;
 use Str;
+use PDF;
 
 class ProjectController extends Controller
 {
@@ -112,7 +113,7 @@ class ProjectController extends Controller
             // mail to user for assigned project
             $users = User::find($request->assignment_user);
             foreach ($users as $user) {
-                Mail::send('emails.new_project', ['user' => $user, 'newproject' => $newproject], function ($m) use ($user) {
+                Mail::send('emails.new-project', ['user' => $user, 'newproject' => $newproject], function ($m) use ($user) {
                     $m->from('admin@metimemoment.com', 'Metime Moment');
                     $m->to($user->email)->subject('New Project Metime Moment');
                 });
@@ -341,5 +342,13 @@ class ProjectController extends Controller
                 'error' => $e->getMessage()
             ]);
         }
+    }
+
+    // get project to pdf
+    public function getProjectPdf($slug)
+    {
+        $project = Project::with('users', 'features', 'package.package_list')->where('slug', $slug)->first();
+        $pdf = PDF::loadView('pdf/pdf-project', compact('project'));
+        return $pdf->stream($project->client);
     }
 }
