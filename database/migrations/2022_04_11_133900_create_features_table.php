@@ -18,6 +18,8 @@ class CreateFeaturesTable extends Migration
             $table->string('feature');
             $table->integer('status');
             $table->foreignId('project_id')->constrained();
+            $table->boolean('additional_features')->default(false);
+            $table->integer('price')->nullable();
             $table->timestamps();
         });
     }
