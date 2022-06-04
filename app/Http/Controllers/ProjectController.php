@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Mail;
 use Str;
 
 class ProjectController extends Controller
@@ -58,6 +59,7 @@ class ProjectController extends Controller
             $attr['folder_gdrive'] = $request->client;
             $attr['slug'] = Str::random(10);
 
+            // upload thumbnail project
             if ($request->hasFile('thumbnail_img')) {
                 $request->validate([
                     'img' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -105,6 +107,15 @@ class ProjectController extends Controller
                     'feature' => $value,
                     'status' => 0,
                 ]);
+            }
+
+            // mail to user for assigned project
+            $users = User::find($request->assignment_user);
+            foreach ($users as $user) {
+                Mail::send('emails.new_project', ['user' => $user, 'newproject' => $newproject], function ($m) use ($user) {
+                    $m->from('admin@metimemoment.com', 'Metime Moment');
+                    $m->to($user->email)->subject('New Project Metime Moment');
+                });
             }
 
             return response()->json([
