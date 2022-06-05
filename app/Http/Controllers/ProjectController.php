@@ -240,16 +240,18 @@ class ProjectController extends Controller
             $project->delete();
 
             // Now find that directory and use its ID (path) to delete it
-            $dir = '/';
-            $recursive = true; // Get subdirectories also?
-            $contents = collect(Storage::disk('google')->listContents($dir, $recursive));
+            if ($project->folder_gdrive) {
+                $dir = '/';
+                $recursive = true; // Get subdirectories also?
+                $contents = collect(Storage::disk('google')->listContents($dir, $recursive));
 
-            $directory = $contents
-                ->where('type', '=', 'dir')
-                ->where('filename', '=', $project->folder_gdrive)
-                ->first(); // there can be duplicate file names!
+                $directory = $contents
+                    ->where('type', '=', 'dir')
+                    ->where('filename', '=', $project->folder_gdrive)
+                    ->first(); // there can be duplicate file names!
 
-            Storage::disk('google')->deleteDirectory($directory['path']);
+                Storage::disk('google')->deleteDirectory($directory['path']);
+            }
 
             return response()->json([
                 'message' => 'Deleted Successfully',
@@ -315,7 +317,6 @@ class ProjectController extends Controller
     {
         try {
             $project = Project::findOrFail($project);
-            return $project->users()->detach($user);
             $project->users()->detach($user);
             return response()->json([
                 'message' => 'successfully',
