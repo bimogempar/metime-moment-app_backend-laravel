@@ -191,17 +191,26 @@ class AuthController extends Controller
         return $request->user();
     }
 
-    public function getUserByUsername($username)
+    public function getUserByUsername(Request $request, $username)
     {
         try {
             $user = User::where('username', $username)->firstOrFail();
-            $projectUser = Project::with('users')->whereHas('users', function ($query) use ($user) {
+            $project_user = Project::with('users')->whereHas('users', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
-            })->get();
+            })->latest();
             $authUser = Auth::user();
+
+            // paginate project users
+            $perpage = 4;
+            $page = $request->input('page', 1);
+            $total = $project_user->count();
+            $projectUser = $project_user->offset(($page - 1) * $perpage)->limit($perpage)->get();
+
             return response()->json([
                 'user' => $user,
                 'projects' => $projectUser,
+                'totalProject' => $total,
+                'last_page' => ceil($total / $perpage),
                 'authUser' => $authUser,
             ], 200);
         } catch (Exception $e) {

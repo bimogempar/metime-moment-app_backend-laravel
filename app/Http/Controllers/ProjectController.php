@@ -265,7 +265,6 @@ class ProjectController extends Controller
 
     public function getProjectsWithSearchKeyword(Request $request)
     {
-        // $projects = Project::with('users')->latest();
         $projects = Project::with('users', 'progress')->latest();
 
         // search keyword

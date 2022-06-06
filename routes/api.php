@@ -167,6 +167,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('user/{username}', [AuthController::class, 'getUserByUsername']);
     Route::get('user/{username}/settings', [AuthController::class, 'getUserSettings']);
     Route::post('user/{username}/updateprofile', [AuthController::class, 'updateUserSetting']);
+    Route::get('users', [AuthController::class, 'getAllUsers']);
 
     // project
     Route::get('projects', [ProjectController::class, 'getProjectsWithSearchKeyword']);
@@ -179,9 +180,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     // attach detach user to project
     Route::post('projects/{project}/add-user', [ProjectController::class, 'addProjectUser']);
     Route::delete('projects/{project}/user/{user}', [ProjectController::class, 'deleteProjectUser']);
-
-    // fetch all users
-    Route::get('users', [AuthController::class, 'getAllUsers']);
 
     // features
     Route::patch('features/{id}', [FeaturesController::class, 'updateFeature']);
