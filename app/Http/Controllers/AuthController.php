@@ -336,4 +336,22 @@ class AuthController extends Controller
             ]);
         }
     }
+
+    public function deleteUser(Request $request, $id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            $user->projects()->detach();
+            $user->TokenInitialPassword()->delete();
+            $user->progress()->delete();
+            $user->delete();
+            return response()->json([
+                'message' => 'Deleted successfully',
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
 }
