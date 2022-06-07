@@ -19,12 +19,14 @@ class AuthController extends Controller
 {
     public function registerAuth(Request $request)
     {
-        if ($request->user()->role === 2) {
+        // return $request->user();
+        if ($request->user()->role === 3 || $request->user()->role === 2) {
             try {
                 $attr = $request->validate([
                     'name' => 'required|max:20',
                     'email' => 'required|email',
                     'username' => 'required',
+                    'role' => 'required',
                 ]);
 
                 $tokeninitialpassword = Str::random(30);
@@ -33,6 +35,7 @@ class AuthController extends Controller
                 $user->name = $attr['name'];
                 $user->email = $attr['email'];
                 $user->username = $attr['username'];
+                $user->role = $attr['role'];
                 $user->no_hp = 0;
                 $user->password = Hash::make('password');
                 $user->save();
@@ -48,12 +51,13 @@ class AuthController extends Controller
                 $user->sendEmailRegister($type_set_password, $user, $tokeninitialpassword);
 
                 return response()->json([
+                    'message' => 'User created successfully',
                     'token_initial_password' => $tokeninitialpassword,
-                    'user' => $user,
+                    'user' => $user->with('projects')->find($user->id),
                 ], 200);
             } catch (Exception $e) {
                 return response()->json([
-                    'error' => $e->getMessage()
+                    'error' => "User already exists",
                 ]);
             }
         }
