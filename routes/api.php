@@ -168,6 +168,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('user/{username}/settings', [AuthController::class, 'getUserSettings']);
     Route::post('user/{username}/updateprofile', [AuthController::class, 'updateUserSetting']);
     Route::get('users', [AuthController::class, 'getAllUsers']);
+    Route::get('users/react-select', [AuthController::class, 'fetchUsersReactSelect']);
 
     // project
     Route::get('projects', [ProjectController::class, 'getProjectsWithSearchKeyword']);

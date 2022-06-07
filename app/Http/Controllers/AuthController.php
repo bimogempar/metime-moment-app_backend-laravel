@@ -288,6 +288,36 @@ class AuthController extends Controller
     public function getAllUsers(Request $request)
     {
         try {
+            $users = User::with('projects')->latest();
+
+            // search keyword
+            if ($s = $request->input('s')) {
+                $users->where('name', 'ilike', '%' . $s . '%')
+                    ->orWhere('username', 'ilike', '%' . $s . '%')
+                    ->orWhere('email', 'ilike', '%' . $s . '%');
+            }
+
+            // paginate users
+            $perpage = 10;
+            $page = $request->input('page', 1);
+            $total = $users->count();
+            $users = $users->offset(($page - 1) * $perpage)->limit($perpage)->get();
+
+            return response()->json([
+                'message' => 'successfully',
+                'users' => $users,
+                'last_page' => ceil($total / $perpage),
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function fetchUsersReactSelect(Request $request)
+    {
+        try {
             $users = User::all();
 
             if ($search = $request->input('s')) {
