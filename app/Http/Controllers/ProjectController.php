@@ -203,13 +203,31 @@ class ProjectController extends Controller
     public function update(Request $request, Project $project)
     {
         try {
-            $project->update([
-                'client' => $request->client,
-                'status' => $request->status,
-                'date' => Carbon::parse($request->date),
-                'location' => $request->location,
-                'phone_number' => $request->phone_number,
+            $attr = $request->validate([
+                'client' => 'required',
+                'date' => 'required',
+                'location' => 'required',
+                'status' => 'required',
+                'phone_number' => 'required',
             ]);
+
+            // update thumbnail_img project
+            if ($request->hasFile('thumbnail_img')) {
+                Storage::disk('public')->delete('thumbnail_img/' . $project->thumbnail_img);
+                $request->validate([
+                    'img' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                ]);
+                $img = $request->file('thumbnail_img');
+                $img_name = $project->slug . '.' . $img->getClientOriginalExtension();
+                $img->storeAs('public/thumbnail_img', $img_name);
+                $attr['thumbnail_img'] = $img_name;
+            } else {
+                $attr['thumbnail_img'] = $project->thumbnail_img;
+            }
+
+            // update project
+            $project->update($attr);
+
             $project->users()->sync($request->assignment_user);
             return response()->json([
                 'message' => 'successfully',

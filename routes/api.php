@@ -175,7 +175,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('projects', [ProjectController::class, 'getProjectsWithSearchKeyword']);
     Route::post('projects/store', [ProjectController::class, 'store']);
     Route::get('projects/{slug}', [ProjectController::class, 'show']);
-    Route::patch('projects/update/{project}', [ProjectController::class, 'update']);
+    Route::post('projects/update/{project}', [ProjectController::class, 'update']);
     Route::delete('projects/{id}/delete', [ProjectController::class, 'destroy']);
     Route::get('projects/{slug}/get-project-pdf', [ProjectController::class, 'getProjectPdf']);
 
