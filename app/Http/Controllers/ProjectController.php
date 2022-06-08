@@ -228,7 +228,8 @@ class ProjectController extends Controller
             // update project
             $project->update($attr);
 
-            $project->users()->sync($request->assignment_user);
+            $decodeAssignmentUser = json_decode($request->assignment_user);
+            $project->users()->sync($decodeAssignmentUser);
             return response()->json([
                 'message' => 'successfully',
                 'project' => $project->with('users', 'features')->find($project->id),
