@@ -172,6 +172,7 @@ class ProjectController extends Controller
             return response()->json([
                 'message' => 'successfully',
                 'project' => $project,
+                'dir' => $dir,
                 'files_gdrive' => $files,
             ]);
         } catch (Exception $e) {
