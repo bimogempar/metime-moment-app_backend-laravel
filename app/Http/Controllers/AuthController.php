@@ -6,6 +6,7 @@ use App\Mail\TestingMail;
 use App\Models\Project;
 use App\Models\TokenInitialPassword;
 use App\Models\User;
+use Auth;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -18,12 +19,14 @@ class AuthController extends Controller
 {
     public function registerAuth(Request $request)
     {
-        if ($request->user()->role === 2) {
+        // return $request->user();
+        if ($request->user()->role === 3 || $request->user()->role === 2) {
             try {
                 $attr = $request->validate([
                     'name' => 'required|max:20',
                     'email' => 'required|email',
                     'username' => 'required',
+                    'role' => 'required',
                 ]);
 
                 $tokeninitialpassword = Str::random(30);
@@ -32,6 +35,7 @@ class AuthController extends Controller
                 $user->name = $attr['name'];
                 $user->email = $attr['email'];
                 $user->username = $attr['username'];
+                $user->role = $attr['role'];
                 $user->no_hp = 0;
                 $user->password = Hash::make('password');
                 $user->save();
@@ -47,12 +51,13 @@ class AuthController extends Controller
                 $user->sendEmailRegister($type_set_password, $user, $tokeninitialpassword);
 
                 return response()->json([
+                    'message' => 'User created successfully',
                     'token_initial_password' => $tokeninitialpassword,
-                    'user' => $user,
+                    'user' => $user->with('projects')->find($user->id),
                 ], 200);
             } catch (Exception $e) {
                 return response()->json([
-                    'error' => $e->getMessage()
+                    'error' => "User already exists",
                 ]);
             }
         }
@@ -190,16 +195,27 @@ class AuthController extends Controller
         return $request->user();
     }
 
-    public function getUserByUsername($username)
+    public function getUserByUsername(Request $request, $username)
     {
         try {
             $user = User::where('username', $username)->firstOrFail();
-            $projectUser = Project::with('users')->whereHas('users', function ($query) use ($user) {
+            $project_user = Project::with('users')->whereHas('users', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
-            })->get();
+            })->latest();
+            $authUser = Auth::user();
+
+            // paginate project users
+            $perpage = 4;
+            $page = $request->input('page', 1);
+            $total = $project_user->count();
+            $projectUser = $project_user->offset(($page - 1) * $perpage)->limit($perpage)->get();
+
             return response()->json([
                 'user' => $user,
                 'projects' => $projectUser,
+                'totalProject' => $total,
+                'last_page' => ceil($total / $perpage),
+                'authUser' => $authUser,
             ], 200);
         } catch (Exception $e) {
             return response()->json([
@@ -250,13 +266,13 @@ class AuthController extends Controller
 
             // change password
             $old_password = $user->password;
-            if ($request->has('new_password')) {
+            if ($request->new_password !== null) {
                 if (Hash::check($request->old_password, $old_password)) {
                     $user->password = Hash::make($request->new_password);
                 } else {
                     return response()->json([
                         'error' => 'Old password is wrong',
-                    ], 404);
+                    ]);
                 }
             }
 
@@ -269,6 +285,77 @@ class AuthController extends Controller
             return response()->json([
                 'error' => $e->getMessage()
             ], 404);
+        }
+    }
+
+    // get all users
+    public function getAllUsers(Request $request)
+    {
+        try {
+            $users = User::with('projects')->latest();
+
+            // search keyword
+            if ($s = $request->input('s')) {
+                $users->where('name', 'ilike', '%' . $s . '%')
+                    ->orWhere('username', 'ilike', '%' . $s . '%')
+                    ->orWhere('email', 'ilike', '%' . $s . '%');
+            }
+
+            // paginate users
+            $perpage = 10;
+            $page = $request->input('page', 1);
+            $total = $users->count();
+            $users = $users->offset(($page - 1) * $perpage)->limit($perpage)->get();
+
+            return response()->json([
+                'message' => 'successfully',
+                'users' => $users,
+                'last_page' => ceil($total / $perpage),
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function fetchUsersReactSelect(Request $request)
+    {
+        try {
+            $users = User::all();
+
+            if ($search = $request->input('s')) {
+                $users = User::where('name', 'ilike', '%' . $search . '%')
+                    ->orWhere('username', 'ilike', '%' . $search . '%')
+                    ->orWhere('email', 'ilike', '%' . $search . '%')->get();
+            }
+
+            return response()->json([
+                'message' => 'successfully',
+                'users' => $users,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function deleteUser(Request $request, $id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            $user->projects()->detach();
+            $user->TokenInitialPassword()->delete();
+            $user->progress()->delete();
+            $user->delete();
+            return response()->json([
+                'message' => 'Deleted successfully',
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ]);
         }
     }
 }

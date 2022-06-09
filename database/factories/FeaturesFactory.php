@@ -16,6 +16,7 @@ class FeaturesFactory extends Factory
         return [
             'feature' => $this->faker->sentence,
             'status' => $this->faker->numberBetween(0, 1),
+            'additional_features' => 0,
         ];
     }
 }

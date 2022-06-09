@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call(UserTableSeeder::class);
+        $this->call(PackageSeeder::class);
+        $this->call(PackageListSeeder::class);
         $this->call(ProjectTableSeeder::class);
         $this->call(ProgressTableSeeder::class);
     }

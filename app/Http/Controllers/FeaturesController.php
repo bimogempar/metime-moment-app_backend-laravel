@@ -32,6 +32,7 @@ class FeaturesController extends Controller
             $feature = Features::create([
                 'feature' => $request->feature,
                 'status' => 0,
+                'additional_features' => true,
                 'project_id' => $projectid,
             ]);
             return response()->json([

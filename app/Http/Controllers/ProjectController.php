@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Features;
+use App\Models\Package;
 use App\Models\Progress;
 use App\Models\Project;
 use App\Models\User;
@@ -9,7 +11,9 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Mail;
 use Str;
+use PDF;
 
 class ProjectController extends Controller
 {
@@ -50,34 +54,74 @@ class ProjectController extends Controller
                 'location' => 'required',
                 'status' => 'required',
                 'phone_number' => 'required',
+                'package_id' => 'required',
             ]);
+
             $attr['folder_gdrive'] = $request->client;
             $attr['slug'] = Str::random(10);
+
+            // upload thumbnail project
+            if ($request->hasFile('thumbnail_img')) {
+                $request->validate([
+                    'img' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                ]);
+                $img = $request->file('thumbnail_img');
+                $img_name = $attr['slug'] . '.' . $img->getClientOriginalExtension();
+                $img->storeAs('public/thumbnail_img', $img_name);
+                $attr['thumbnail_img'] = $img_name;
+            }
+
             $newproject = Project::create($attr);
             $newproject->users()->attach($request->assignment_user);
 
             // GDRIVE API
             // create dir
             Storage::disk('google')->makeDirectory($request->client);
+            $dir = "No files found";
 
             // upload into sub folder
-            $dir = '/';
-            $recursive = false; // Get subdirectories also?
-            $files = Storage::disk('google')->files($dir);
-            $contents = collect(Storage::disk('google')->listContents($dir, $recursive));
+            if ($request->hasFile('img')) {
+                $dir = '/';
+                $recursive = false; // Get subdirectories also?
+                $files = Storage::disk('google')->files($dir);
+                $contents = collect(Storage::disk('google')->listContents($dir, $recursive));
+                $dir = $contents->where('type', '=', 'dir')
+                    ->where('filename', '=', $request->client)
+                    ->first(); // There could be duplicate directory names!
 
-            $dir = $contents->where('type', '=', 'dir')
-                ->where('filename', '=', $request->client)
-                ->first(); // There could be duplicate directory names!
-
-            if (!$dir) {
-                return 'Directory does not exist!';
+                // if (!$dir) {
+                //     return 'Directory does not exist!';
+                // }
+                Storage::disk('google')->put($dir['path'] . '/' . $request->file('img')->getClientOriginalName(), file_get_contents($request->file('img')));
             }
 
-            Storage::disk('google')->put($dir['path'] . '/' . $request->file('img')->getClientOriginalName(), file_get_contents($request->file('img')));
+            // chooee package
+            $package = Package::find($request->package_id)->with('package_list')->first();
+            $packageList = $package->package_list;
+            foreach ($packageList as $value) {
+                $arr[] = $value->name;
+            }
+            // insert into features
+            foreach ($arr as $value) {
+                $features = Features::create([
+                    'project_id' => $newproject->id,
+                    'feature' => $value,
+                    'status' => 0,
+                ]);
+            }
+
+            // mail to user for assigned project
+            $users = User::find($request->assignment_user);
+            foreach ($users as $user) {
+                Mail::send('emails.new-project', ['user' => $user, 'newproject' => $newproject], function ($m) use ($user) {
+                    $m->from('admin@metimemoment.com', 'Metime Moment');
+                    $m->to($user->email)->subject('New Project Metime Moment');
+                });
+            }
+
             return response()->json([
                 'message' => 'successfully',
-                'project' => $newproject->with('users')->find($newproject->id),
+                'project' => $newproject->with('users', 'features', 'progress', 'package.package_list')->find($newproject->id),
                 'gdrive_path' => $dir,
             ], 200);
         } catch (Exception $e) {
@@ -96,7 +140,7 @@ class ProjectController extends Controller
     public function show($slug)
     {
         try {
-            $project = Project::with('users', 'features', 'progress')->where('slug', $slug)->first();
+            $project = Project::with('users', 'features', 'progress', 'package.package_list')->where('slug', $slug)->first();
             $project->progress = $project->progress->map(function ($item) {
                 $item->name = $item->user->name;
             });
@@ -128,6 +172,7 @@ class ProjectController extends Controller
             return response()->json([
                 'message' => 'successfully',
                 'project' => $project,
+                'dir' => $dir,
                 'files_gdrive' => $files,
             ]);
         } catch (Exception $e) {
@@ -158,14 +203,33 @@ class ProjectController extends Controller
     public function update(Request $request, Project $project)
     {
         try {
-            $project->update([
-                'client' => $request->client,
-                'status' => $request->status,
-                'date' => Carbon::parse($request->date),
-                'location' => $request->location,
-                'phone_number' => $request->phone_number,
+            $attr = $request->validate([
+                'client' => 'required',
+                'date' => 'required',
+                'location' => 'required',
+                'status' => 'required',
+                'phone_number' => 'required',
             ]);
-            $project->users()->sync($request->assignment_user);
+
+            // update thumbnail_img project
+            if ($request->hasFile('thumbnail_img')) {
+                Storage::disk('public')->delete('thumbnail_img/' . $project->thumbnail_img);
+                $request->validate([
+                    'img' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                ]);
+                $img = $request->file('thumbnail_img');
+                $img_name = $project->slug . '.' . $img->getClientOriginalExtension();
+                $img->storeAs('public/thumbnail_img', $img_name);
+                $attr['thumbnail_img'] = $img_name;
+            } else {
+                $attr['thumbnail_img'] = $project->thumbnail_img;
+            }
+
+            // update project
+            $project->update($attr);
+
+            $decodeAssignmentUser = json_decode($request->assignment_user);
+            $project->users()->sync($decodeAssignmentUser);
             return response()->json([
                 'message' => 'successfully',
                 'project' => $project->with('users', 'features')->find($project->id),
@@ -190,9 +254,27 @@ class ProjectController extends Controller
             $project->progress()->delete();
             $project->features()->delete();
             $project->users()->detach();
+            if ($project->thumbnail_img) {
+                Storage::disk('public')->delete('thumbnail_img/' . $project->thumbnail_img);
+            }
             $project->delete();
+
+            // Now find that directory and use its ID (path) to delete it
+            if ($project->folder_gdrive) {
+                $dir = '/';
+                $recursive = true; // Get subdirectories also?
+                $contents = collect(Storage::disk('google')->listContents($dir, $recursive));
+
+                $directory = $contents
+                    ->where('type', '=', 'dir')
+                    ->where('filename', '=', $project->folder_gdrive)
+                    ->first(); // there can be duplicate file names!
+
+                Storage::disk('google')->deleteDirectory($directory['path']);
+            }
+
             return response()->json([
-                'message' => 'successfully',
+                'message' => 'Deleted Successfully',
             ]);
         } catch (Exception $e) {
             return response()->json([
@@ -203,7 +285,6 @@ class ProjectController extends Controller
 
     public function getProjectsWithSearchKeyword(Request $request)
     {
-        // $projects = Project::with('users')->latest();
         $projects = Project::with('users', 'progress')->latest();
 
         // search keyword
@@ -255,7 +336,6 @@ class ProjectController extends Controller
     {
         try {
             $project = Project::findOrFail($project);
-            return $project->users()->detach($user);
             $project->users()->detach($user);
             return response()->json([
                 'message' => 'successfully',
@@ -284,19 +364,11 @@ class ProjectController extends Controller
         }
     }
 
-    // get all users
-    public function getAllUsers()
+    // get project to pdf
+    public function getProjectPdf($slug)
     {
-        try {
-            $users = User::all();
-            return response()->json([
-                'message' => 'successfully',
-                'users' => $users,
-            ]);
-        } catch (Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage()
-            ]);
-        }
+        $project = Project::with('users', 'features', 'package.package_list')->where('slug', $slug)->first();
+        $pdf = PDF::loadView('pdf/pdf-project', compact('project'));
+        return $pdf->stream($project->client);
     }
 }

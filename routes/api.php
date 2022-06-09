@@ -25,6 +25,22 @@ Route::get('/test', function (Request $request) {
     return response()->json(['message' => 'It Works!']);
 });
 
+// Testing upload file
+Route::post('/upload-file', function (Request $request) {
+    $img = $request->file('img');
+    return $img->storeAs('/test', 'test.png');
+});
+
+// Testing DOMPDF
+Route::get('/test-dompdf', function (Request $request) {
+    return view('test/test-dompdf');
+});
+Route::get('/get-dompdf', function (Request $request) {
+    $pdf = \App::make('dompdf.wrapper');
+    $pdf->loadHTML('<h1>Test</h1>');
+    return $pdf->stream();
+});
+
 // Testing google drive filesystem
 Route::post('/post-file-to-gdrive', function (Request $request) {
     // request
@@ -62,7 +78,6 @@ Route::post('/post-file-to-gdrive', function (Request $request) {
     Storage::disk('google')->put($dir['path'] . '/' . $img->getClientOriginalName(), file_get_contents($img));
     return $dir;
 });
-
 Route::get('/get-from-gdrive', function () {
     // The human readable folder name to get the contents of...
     // For simplicity, this folder is assumed to exist in the root directory.
@@ -151,21 +166,22 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('user', [AuthController::class, 'getUser']);
     Route::get('user/{username}', [AuthController::class, 'getUserByUsername']);
     Route::get('user/{username}/settings', [AuthController::class, 'getUserSettings']);
-    Route::patch('user/{username}/updateprofile', [AuthController::class, 'updateUserSetting']);
+    Route::post('user/{username}/updateprofile', [AuthController::class, 'updateUserSetting']);
+    Route::get('users', [AuthController::class, 'getAllUsers']);
+    Route::get('users/react-select', [AuthController::class, 'fetchUsersReactSelect']);
+    Route::delete('users/{id}/delete', [AuthController::class, 'deleteUser']);
 
     // project
     Route::get('projects', [ProjectController::class, 'getProjectsWithSearchKeyword']);
     Route::post('projects/store', [ProjectController::class, 'store']);
     Route::get('projects/{slug}', [ProjectController::class, 'show']);
-    Route::patch('projects/update/{project}', [ProjectController::class, 'update']);
+    Route::post('projects/update/{project}', [ProjectController::class, 'update']);
     Route::delete('projects/{id}/delete', [ProjectController::class, 'destroy']);
+    Route::get('projects/{slug}/get-project-pdf', [ProjectController::class, 'getProjectPdf']);
 
     // attach detach user to project
     Route::post('projects/{project}/add-user', [ProjectController::class, 'addProjectUser']);
     Route::delete('projects/{project}/user/{user}', [ProjectController::class, 'deleteProjectUser']);
-
-    // fetch all users
-    Route::get('users', [ProjectController::class, 'getAllUsers']);
 
     // features
     Route::patch('features/{id}', [FeaturesController::class, 'updateFeature']);
