@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FeaturesController;
+use App\Http\Controllers\PackageController;
 use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\ProjectController;
 use App\Models\Project;
@@ -191,4 +192,11 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     // progress
     Route::post('projects/{project_id}/progress/store', [ProgressController::class, 'storeProgress']);
     Route::delete('projects/{project_id}/progress/{progress_id}', [ProgressController::class, 'destroyProgress']);
+
+    // packages
+    Route::get('packages', [PackageController::class, 'getPackages']);
+    Route::get('packages/{id}', [PackageController::class, 'showPackage']);
+    Route::post('packages/store', [PackageController::class, 'storePackage']);
+    Route::post('packages/{id}/update', [PackageController::class, 'updatePackage']);
+    Route::delete('packages/{id}/delete', [PackageController::class, 'destroyPackage']);
 });
