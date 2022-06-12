@@ -56,7 +56,7 @@ class PackageController extends Controller
 
             return response()->json([
                 'message' => 'success',
-                'package' => $package->with('package_list')->get()
+                'package' => $package->with('package_list')->latest()->get()
             ], 200);
         } catch (Exception $e) {
             return response()->json([
