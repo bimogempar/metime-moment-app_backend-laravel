@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\EventProject;
 use App\Models\Features;
 use App\Models\Package;
 use App\Models\Progress;
@@ -121,6 +122,10 @@ class ProjectController extends Controller
                     $m->to($user->email)->subject('New Project Metime Moment');
                 });
             }
+
+            // make event project
+            $event = new EventProject($newproject->with('users', 'features', 'progress', 'package.package_list')->find($newproject->id));
+            event($event);
 
             return response()->json([
                 'message' => 'successfully',

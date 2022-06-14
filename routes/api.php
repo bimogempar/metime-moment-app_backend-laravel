@@ -23,6 +23,8 @@ use Illuminate\Support\Facades\Route;
 */
 //
 Route::get('/test', function (Request $request) {
+    // test event pusher
+    event(new App\Events\EventProject('test'));
     return response()->json(['message' => 'It Works!']);
 });
 
