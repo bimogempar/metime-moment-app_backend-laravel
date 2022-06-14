@@ -50,14 +50,14 @@ class UserTest extends TestCase
             'name' => 'Test New User',
             'email' => 'testnewuser@example.com',
             'username' => 'testnewuser',
+            'role' => 1
         ]);
 
         $response->assertStatus(200)
             ->assertJsonStructure([
+                'message',
                 'token_initial_password',
-                'status'
+                'user'
             ]);
-
-        $this->assertTrue(true);
     }
 }
