@@ -199,4 +199,5 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('packages/store', [PackageController::class, 'storePackage']);
     Route::post('packages/{id}/update', [PackageController::class, 'updatePackage']);
     Route::delete('packages/{id}/delete', [PackageController::class, 'destroyPackage']);
+    Route::get('packages/fetch/react-select', [PackageController::class, 'fetchPackageReactSelect']);
 });

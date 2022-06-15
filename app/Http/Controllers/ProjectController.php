@@ -72,7 +72,9 @@ class ProjectController extends Controller
             }
 
             $newproject = Project::create($attr);
-            $newproject->users()->attach($request->assignment_user);
+
+            $decodeAssignmentUser = json_decode($request->assignment_user);
+            $newproject->users()->attach($decodeAssignmentUser);
 
             // GDRIVE API
             // create dir
@@ -111,7 +113,7 @@ class ProjectController extends Controller
             }
 
             // mail to user for assigned project
-            $users = User::find($request->assignment_user);
+            $users = User::find($decodeAssignmentUser);
             foreach ($users as $user) {
                 Mail::send('emails.new-project', ['user' => $user, 'newproject' => $newproject], function ($m) use ($user) {
                     $m->from('admin@metimemoment.com', 'Metime Moment');

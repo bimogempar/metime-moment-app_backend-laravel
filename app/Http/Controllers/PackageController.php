@@ -108,4 +108,23 @@ class PackageController extends Controller
             ], 500);
         }
     }
+
+    public function fetchPackageReactSelect()
+    {
+        try {
+            $packages = Package::get([
+                'id',
+                'name'
+            ]);
+            return response()->json([
+                'message' => 'success',
+                'packages' => $packages
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'error',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
