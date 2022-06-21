@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Package;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -58,6 +59,70 @@ class UserTest extends TestCase
                 'message',
                 'token_initial_password',
                 'user'
+            ]);
+    }
+
+    public function testUpdateUser()
+    {
+        $user = User::where('username', 'admin')->first();
+        Sanctum::actingAs($user, ['*']);
+
+        $response = $this->post('api/user/' . $user->username . '/updateprofile', [
+            'name' => 'Admin Edited',
+            'username' => 'admin',
+            'no_hp' => '081234567890',
+            'role' => 1,
+            'email' => 'admin@example.com'
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'message',
+                'user'
+            ]);
+    }
+
+    public function testGetUserProfile()
+    {
+        $user = User::where('username', 'admin')->first();
+        Sanctum::actingAs($user, ['*']);
+
+        $response = $this->get('api/user/' . $user->username);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'user',
+                'projects',
+                'totalProject',
+                'last_page',
+                'authUser',
+            ]);
+    }
+
+    public function testUserGotEmailNotification()
+    {
+        $user = User::where('username', 'admin')->first();
+        Sanctum::actingAs($user, ['*']);
+
+        // get package
+        $package = Package::first();
+
+        // User where id 1,2,3 got email notification
+        $response = $this->post('/api/projects/store', [
+            'client' => 'Test new client project',
+            'date' => '2022-05-28',
+            'time' => '23:27:27',
+            'location' => 'Test new location',
+            'status' => '1',
+            'phone_number' => '08819417402',
+            'package_id' => $package->id,
+            'assignment_user' => json_encode([1, 2, 3])
+        ])
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'message',
+                'project',
+                'gdrive_path'
             ]);
     }
 }
