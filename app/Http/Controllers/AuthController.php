@@ -47,7 +47,7 @@ class AuthController extends Controller
                     ])
                 );
 
-                $type_set_password = "set init password";
+                $type_set_password = "Please set your password first!";
                 $user->sendEmailRegister($type_set_password, $user, $tokeninitialpassword);
 
                 return response()->json([
@@ -123,7 +123,7 @@ class AuthController extends Controller
                 'email' => 'required|email',
             ]);
 
-            $type_set_password = "forgot password";
+            $type_set_password = "Forgot Password";
             $user = User::where('email', $attr['email'])->firstOrFail();
             $token = $user->TokenInitialPassword()->firstOrFail();
             $token->status = 0;

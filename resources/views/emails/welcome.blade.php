@@ -374,8 +374,9 @@
                                     <tr>
                                         <td>
                                             <p style="font-size: 1.5rem">Hi {{ $user->name }},</p>
-                                            <p>With this email we inform you that you must set your first password for
-                                                login the app. Click this button to set your first password!</p>
+                                            <p style="font-size: 1.2rem">{{ $type_set_password }}</p>
+                                            <p>With this email we inform you that you must set your password for
+                                                login the app. Click this button to set your password!</p>
                                             <table role="presentation" border="0" cellpadding="0" cellspacing="0"
                                                 class="btn btn-primary">
                                                 <tbody>
