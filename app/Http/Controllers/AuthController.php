@@ -24,8 +24,8 @@ class AuthController extends Controller
             try {
                 $attr = $request->validate([
                     'name' => 'required|max:20',
-                    'email' => 'required|email',
-                    'username' => 'required',
+                    'email' => 'required|email|unique:users',
+                    'username' => 'required|unique:users',
                     'role' => 'required',
                 ]);
 
