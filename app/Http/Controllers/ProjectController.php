@@ -112,6 +112,7 @@ class ProjectController extends Controller
                 ]);
             }
 
+            $newproject = $newproject->with('users', 'features', 'progress', 'package.package_list')->find($newproject->id);
             // mail to user for assigned project
             $users = User::find($decodeAssignmentUser);
             foreach ($users as $user) {
@@ -123,7 +124,7 @@ class ProjectController extends Controller
 
             return response()->json([
                 'message' => 'successfully',
-                'project' => $newproject->with('users', 'features', 'progress', 'package.package_list')->find($newproject->id),
+                'project' => $newproject,
                 'gdrive_path' => $dir,
             ], 200);
         } catch (Exception $e) {
@@ -232,9 +233,10 @@ class ProjectController extends Controller
 
             $decodeAssignmentUser = json_decode($request->assignment_user);
             $project->users()->sync($decodeAssignmentUser);
+            $project = $project->with('users', 'features')->find($project->id);
             return response()->json([
                 'message' => 'successfully',
-                'project' => $project->with('users', 'features')->find($project->id),
+                'project' => $project,
             ], 200);
         } catch (Exception $e) {
             return response()->json([
