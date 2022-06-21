@@ -30,7 +30,7 @@ class ProjectTest extends TestCase
             'status' => '1',
             'phone_number' => '08819417402',
             'package_id' => $package->id,
-            'assignment_user' => [1, 2, 3]
+            'assignment_user' => json_encode([1, 2, 3])
         ])
             ->assertStatus(200)
             ->assertJsonStructure([
