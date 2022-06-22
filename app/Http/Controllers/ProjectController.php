@@ -372,7 +372,12 @@ class ProjectController extends Controller
     public function getProjectPdf($slug)
     {
         $project = Project::with('users', 'features', 'package.package_list')->where('slug', $slug)->first();
-        $pdf = PDF::loadView('pdf/pdf-project', compact('project'));
-        return $pdf->stream($project->client);
+        // $pdf = PDF::loadView('pdf/pdf-project', compact('project'));
+        // return $pdf->stream($project->client);
+        // return view('pdf.pdf-project', compact('project'));
+        return response()->json([
+            'message' => "Success",
+            'project' => $project
+        ]);
     }
 }
