@@ -125,4 +125,16 @@ class UserTest extends TestCase
                 'gdrive_path'
             ]);
     }
+
+    public function testUserForgotPassword()
+    {
+        $response = $this->post('/api/forgot-pass', [
+            'email' => 'bimo@example.com',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'message',
+            ]);
+    }
 }
