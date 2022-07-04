@@ -62,7 +62,7 @@ class ProjectTest extends TestCase
         $user = User::where('username', 'admin')->first();
         Sanctum::actingAs($user, ['*']);
 
-        $project = Project::find(25);
+        $project = Project::first();
 
         $assignment_user = [1, 2, 4];
         $project->users()->sync($assignment_user);
