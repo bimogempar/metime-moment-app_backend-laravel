@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\NotifUser;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FeaturesController;
 use App\Http\Controllers\PackageController;
@@ -24,7 +25,15 @@ use Illuminate\Support\Facades\Route;
 //
 Route::get('/test', function (Request $request) {
     // test event pusher
-    event(new App\Events\EventProject('test'));
+    // event(new App\Events\EventProject([
+    //     'project_id' => 1,
+    //     'user_id' => 1,
+    //     'message' => 'test event pusher',
+    // ]));
+    event(new NotifUser([
+        'user_id' => 5,
+        'message' => 'test event pusher',
+    ]));
     return response()->json(['message' => 'It Works!']);
 });
 
