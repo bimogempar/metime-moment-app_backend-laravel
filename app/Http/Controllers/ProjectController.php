@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\EventProject;
+use App\Events\NotifUser;
 use App\Models\Features;
 use App\Models\Package;
 use App\Models\Progress;
@@ -124,13 +125,28 @@ class ProjectController extends Controller
             }
 
             // make event project
-            $event = new EventProject($newproject->with('users', 'features', 'progress', 'package.package_list')->find($newproject->id));
-            event($event);
+            event(new EventProject(
+                [
+                    'message' => 'New Project Added',
+                    'new_project' => $newproject->with('users', 'features', 'progress', 'package.package_list')->find($newproject->id),
+                ]
+            ));
+
+            foreach ($users as $user) {
+                // $notif = new NotifUser($user, $newproject);
+                // event($notif);
+                event(new NotifUser([
+                    'user_id' => $user->id,
+                    'type' => 'new-project',
+                    'message' => "New Project assigned to you, here's the detail ",
+                    'link_project' => env('FRONTEND_NEXTJS') . "/projects/" . $newproject->slug,
+                ]));
+            }
 
             return response()->json([
                 'message' => 'successfully',
                 'project' => $newproject,
-                'gdrive_path' => $dir,
+                'gdrive_path' => $dir ?? '',
             ], 200);
         } catch (Exception $e) {
             return response()->json([
