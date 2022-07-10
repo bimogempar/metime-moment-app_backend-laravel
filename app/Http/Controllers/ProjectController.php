@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\EventProject;
 use App\Events\NotifUser;
 use App\Models\Features;
+use App\Models\Notification;
 use App\Models\Package;
 use App\Models\Progress;
 use App\Models\Project;
@@ -132,15 +133,26 @@ class ProjectController extends Controller
                 ]
             ));
 
+            // make new event for notif user
             foreach ($users as $user) {
-                // $notif = new NotifUser($user, $newproject);
-                // event($notif);
                 event(new NotifUser([
                     'user_id' => $user->id,
                     'type' => 'new-project',
-                    'message' => "New Project assigned to you, here's the detail ",
-                    'link_project' => env('FRONTEND_NEXTJS') . "/projects/" . $newproject->slug,
+                    'message' => [
+                        'message' => "New Project assigned to you, here's the detail ",
+                        'link_project' => env('FRONTEND_NEXTJS') . "/projects/" . $newproject->slug,
+                    ],
                 ]));
+
+                // insert event to db
+                Notification::create([
+                    'user_id' => $user->id,
+                    'type' => 'new-project',
+                    'message' => json_encode([
+                        'message' => "New Project assigned to you, here's the detail ",
+                        'link_project' => env('FRONTEND_NEXTJS') . "/projects/" . $newproject->slug,
+                    ]),
+                ]);
             }
 
             return response()->json([

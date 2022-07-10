@@ -6,6 +6,7 @@ use App\Http\Controllers\FeaturesController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\ProjectController;
+use App\Models\Notification;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -32,8 +33,21 @@ Route::get('/test', function (Request $request) {
     // ]));
     event(new NotifUser([
         'user_id' => 5,
-        'message' => 'test event pusher',
+        'message' => [
+            'data' => 'test',
+            'message' => 'test event pusher',
+        ],
     ]));
+
+    Notification::create([
+        'user_id' => 5,
+        'type' => 'test',
+        'message' => json_encode([
+            'data' => 'test',
+            'message' => 'test event pusher',
+        ]),
+    ]);
+
     return response()->json(['message' => 'It Works!']);
 });
 
