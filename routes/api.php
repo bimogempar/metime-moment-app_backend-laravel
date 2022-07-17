@@ -172,6 +172,9 @@ Route::get('/test/many-to-many', function () {
 // login page
 Route::post('/login', [AuthController::class, 'loginAuth']);
 
+// read notification
+Route::put('notifications/{user_id}', [AuthController::class, 'readNotification']);
+
 // set pass after registration
 Route::get('/set-pass/{token_initial_password}', [AuthController::class, 'getSetPass']);
 Route::post('/set-pass', [AuthController::class, 'setInitPass']);

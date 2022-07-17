@@ -374,4 +374,23 @@ class AuthController extends Controller
             ]);
         }
     }
+
+    public function readNotification(Request $request, $user_id)
+    {
+        try {
+            $user = User::findOrFail($user_id);
+            $notifications = $user->notification()->latest()->where('read_at', null)->get();
+            foreach ($notifications as $notification) {
+                $notification->read_at = now();
+                $notification->save();
+            }
+            return response()->json([
+                'message' => 'successfully',
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
 }
