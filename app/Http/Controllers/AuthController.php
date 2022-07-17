@@ -26,6 +26,7 @@ class AuthController extends Controller
                     'name' => 'required|max:20',
                     'email' => 'required|email|unique:users',
                     'username' => 'required|unique:users',
+                    'no_hp' => 'number|unique:users',
                     'role' => 'required',
                 ]);
 
@@ -36,7 +37,7 @@ class AuthController extends Controller
                 $user->email = $attr['email'];
                 $user->username = $attr['username'];
                 $user->role = $attr['role'];
-                $user->no_hp = 0;
+                $user->no_hp = $attr['no_hp'];
                 $user->password = Hash::make('password');
                 $user->save();
 
