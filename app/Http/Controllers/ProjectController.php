@@ -79,25 +79,27 @@ class ProjectController extends Controller
             $decodeAssignmentUser = json_decode($request->assignment_user);
             $newproject->users()->attach($decodeAssignmentUser);
 
-            // GDRIVE API
-            // create dir
-            Storage::disk('google')->makeDirectory($request->client);
-            $dir = "No files found";
+            if (app()->environment('production')) {
+                // GDRIVE API
+                // create dir
+                Storage::disk('google')->makeDirectory($request->client);
+                $dir = "No files found";
 
-            // upload into sub folder
-            if ($request->hasFile('img')) {
-                $dir = '/';
-                $recursive = false; // Get subdirectories also?
-                $files = Storage::disk('google')->files($dir);
-                $contents = collect(Storage::disk('google')->listContents($dir, $recursive));
-                $dir = $contents->where('type', '=', 'dir')
-                    ->where('filename', '=', $request->client)
-                    ->first(); // There could be duplicate directory names!
+                // upload into sub folder
+                if ($request->hasFile('img')) {
+                    $dir = '/';
+                    $recursive = false; // Get subdirectories also?
+                    $files = Storage::disk('google')->files($dir);
+                    $contents = collect(Storage::disk('google')->listContents($dir, $recursive));
+                    $dir = $contents->where('type', '=', 'dir')
+                        ->where('filename', '=', $request->client)
+                        ->first(); // There could be duplicate directory names!
 
-                // if (!$dir) {
-                //     return 'Directory does not exist!';
-                // }
-                Storage::disk('google')->put($dir['path'] . '/' . $request->file('img')->getClientOriginalName(), file_get_contents($request->file('img')));
+                    // if (!$dir) {
+                    //     return 'Directory does not exist!';
+                    // }
+                    Storage::disk('google')->put($dir['path'] . '/' . $request->file('img')->getClientOriginalName(), file_get_contents($request->file('img')));
+                }
             }
 
             // chooee package
@@ -116,13 +118,16 @@ class ProjectController extends Controller
             }
 
             $newproject = $newproject->with('users', 'features', 'progress', 'package.package_list')->find($newproject->id);
-            // mail to user for assigned project
             $users = User::find($decodeAssignmentUser);
-            foreach ($users as $user) {
-                Mail::send('emails.new-project', ['user' => $user, 'newproject' => $newproject], function ($m) use ($user) {
-                    $m->from('admin@metimemoment.com', 'Metime Moment');
-                    $m->to($user->email)->subject('New Project Metime Moment');
-                });
+
+            if (app()->environment('production')) {
+                // mail to user for assigned project
+                foreach ($users as $user) {
+                    Mail::send('emails.new-project', ['user' => $user, 'newproject' => $newproject], function ($m) use ($user) {
+                        $m->from('admin@metimemoment.com', 'Metime Moment');
+                        $m->to($user->email)->subject('New Project Metime Moment');
+                    });
+                }
             }
 
             // make event project
@@ -133,25 +138,20 @@ class ProjectController extends Controller
                 ]
             ));
 
-            // make new event for notif user
+            // make event for user
             foreach ($users as $user) {
+                // make new event for notif user
                 event(new NotifUser([
                     'user_id' => $user->id,
                     'type' => 'new-project',
-                    'message' => [
-                        'message' => "New Project assigned to you, here's the detail ",
-                        'link_project' => env('FRONTEND_NEXTJS') . "/projects/" . $newproject->slug,
-                    ],
+                    'message' => "New project assigned to you, the project is " . $newproject->client . " created by " . Auth()->user()->name,
                 ]));
 
                 // insert event to db
                 Notification::create([
                     'user_id' => $user->id,
                     'type' => 'new-project',
-                    'message' => json_encode([
-                        'message' => "New Project assigned to you, here's the detail ",
-                        'link_project' => env('FRONTEND_NEXTJS') . "/projects/" . $newproject->slug,
-                    ]),
+                    'message' => "New project assigned to you, the project is " . $newproject->client . " created by " . Auth()->user()->name,
                 ]);
             }
 

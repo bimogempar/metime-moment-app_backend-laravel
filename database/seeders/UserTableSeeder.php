@@ -96,7 +96,7 @@ class UserTableSeeder extends Seeder
             'username' => 'adenovan',
             'email' => 'adenovan@example.com',
             'no_hp' => '085607612503',
-            'role' => 2,
+            'role' => 1,
             'password' => Hash::make('password'),
         ])->TokenInitialPassword()->save(
             new TokenInitialPassword([

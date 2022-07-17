@@ -42,10 +42,7 @@ Route::get('/test', function (Request $request) {
     Notification::create([
         'user_id' => 5,
         'type' => 'test',
-        'message' => json_encode([
-            'data' => 'test',
-            'message' => 'test event pusher',
-        ]),
+        'message' => "test event with pusher",
     ]);
 
     return response()->json(['message' => 'It Works!']);
@@ -196,6 +193,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('users', [AuthController::class, 'getAllUsers']);
     Route::get('users/react-select', [AuthController::class, 'fetchUsersReactSelect']);
     Route::delete('users/{id}/delete', [AuthController::class, 'deleteUser']);
+
+    // notification
+    Route::get('notifications/{user_id}', [AuthController::class, 'getNotification']);
 
     // project
     Route::get('projects', [ProjectController::class, 'getProjectsWithSearchKeyword']);
