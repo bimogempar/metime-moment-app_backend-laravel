@@ -19,7 +19,8 @@ class ProjectFactory extends Factory
         $slug = Str::slug($client . "-" . $eachclient);
         return [
             'client' => $client . " & " . $eachclient,
-            'date' => $this->faker->dateTimeThisMonth(),
+            // 'date' => $this->faker->dateTimeBetween('-6 month', '+6 month'),
+            'date' => $this->faker->dateTimeThisYear('2022-12-31'),
             'time' => $this->faker->time(),
             'location' => $this->faker->streetName(),
             'status' => $this->faker->numberBetween(1, 3),

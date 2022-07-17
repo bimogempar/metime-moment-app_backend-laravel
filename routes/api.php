@@ -31,19 +31,14 @@ Route::get('/test', function (Request $request) {
     //     'user_id' => 1,
     //     'message' => 'test event pusher',
     // ]));
-    event(new NotifUser([
-        'user_id' => 5,
-        'message' => [
-            'data' => 'test',
-            'message' => 'test event pusher',
-        ],
-    ]));
 
-    Notification::create([
+    $notif = Notification::create([
         'user_id' => 5,
         'type' => 'test',
         'message' => "test event with pusher",
     ]);
+
+    event(new NotifUser($notif));
 
     return response()->json(['message' => 'It Works!']);
 });

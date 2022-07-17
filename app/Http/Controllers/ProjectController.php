@@ -141,19 +141,15 @@ class ProjectController extends Controller
 
             // make event for user
             foreach ($users as $user) {
-                // make new event for notif user
-                event(new NotifUser([
-                    'user_id' => $user->id,
-                    'type' => 'new-project',
-                    'message' => "New project assigned to you, the project is " . $newproject->client . " created by " . Auth()->user()->name,
-                ]));
-
                 // insert event to db
-                Notification::create([
+                $notif = Notification::create([
                     'user_id' => $user->id,
                     'type' => 'new-project',
                     'message' => "New project assigned to you, the project is " . $newproject->client . " created by " . Auth()->user()->name,
                 ]);
+
+                // make new event for notif user
+                event(new NotifUser($notif));
             }
 
             return response()->json([
