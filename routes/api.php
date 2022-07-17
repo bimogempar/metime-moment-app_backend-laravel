@@ -204,6 +204,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('projects/update/{project}', [ProjectController::class, 'update']);
     Route::delete('projects/{id}/delete', [ProjectController::class, 'destroy']);
     Route::get('projects/{slug}/get-project-pdf', [ProjectController::class, 'getProjectPdf']);
+    Route::get('count-project-by-month', [ProjectController::class, 'countByMonth']);
 
     // attach detach user to project
     Route::post('projects/{project}/add-user', [ProjectController::class, 'addProjectUser']);

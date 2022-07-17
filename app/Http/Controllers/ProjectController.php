@@ -11,6 +11,7 @@ use App\Models\Progress;
 use App\Models\Project;
 use App\Models\User;
 use Carbon\Carbon;
+use DB;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -412,5 +413,32 @@ class ProjectController extends Controller
             'message' => "Success",
             'project' => $project
         ]);
+    }
+
+    public function countByMonth()
+    {
+        $projects = Project::select('id', 'date')
+            ->get()
+            ->groupBy(function ($date) {
+                //return Carbon::parse($date->date)->format('Y'); // grouping by years
+                return Carbon::parse($date->date)->format('m'); // grouping by months
+            });
+
+        $projectCount = [];
+        $projectArr = [];
+
+        foreach ($projects as $key => $value) {
+            $projectCount[(int)$key] = count($value);
+        }
+
+        for ($i = 1; $i <= 12; $i++) {
+            if (!empty($projectCount[$i])) {
+                $projectArr[$i] = $projectCount[$i];
+            } else {
+                $projectArr[$i] = 0;
+            }
+        }
+
+        return $projectArr;
     }
 }
